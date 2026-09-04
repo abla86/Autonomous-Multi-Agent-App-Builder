@@ -1,0 +1,6 @@
+{
+  "name": "Sjelden Kunnskap",
+  "description": "En interaktiv plattform for å oppdage obskure fakta, løse historiske og vitenskapelige mysterier, ta intrikate quizer og utforske kuriositeter.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
