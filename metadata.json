@@ -1,0 +1,6 @@
+{
+  "name": "Robotics Spatial Understanding & Exhibit Curator",
+  "description": "Interactive museum prototype with robotics spatial understanding (2D bounding boxes & points), exhibit concept art generation, and video tour analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
