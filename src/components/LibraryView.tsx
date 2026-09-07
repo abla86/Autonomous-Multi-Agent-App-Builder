@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { Category, RareFact } from '../types';
 import {
   BookOpen,
@@ -99,7 +100,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   return (
     <div id="library-view-container" className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Header Banner */}
-      <div className="bg-[#16181D] border border-[#2D3139] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+      <motion.div
+        whileHover={{ y: -2 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/40 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden transition-colors shadow-lg"
+      >
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
             <BookOpen className="w-3.5 h-3.5" /> Det Kuraterte Biblioteket
@@ -121,7 +126,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           <Sparkles className="w-4 h-4" />
           {isGenerating ? 'Avdekker ny sjeldenhet...' : 'Avdekk Ny Sjeldenhet'}
         </button>
-      </div>
+      </motion.div>
 
       {/* Category Pills & Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#2D3139] pb-4">
@@ -163,10 +168,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           const isLiked = likedIds.includes(fact.id);
 
           return (
-            <div
+            <motion.div
               key={fact.id}
               id={`fact-card-${fact.id}`}
-              className="bg-[#16181D] border border-[#2D3139] rounded-xl p-5 flex flex-col justify-between hover:border-[#D4AF37]/60 transition-all group"
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="bg-[#16181D] border border-[#2D3139] rounded-xl p-5 flex flex-col justify-between hover:border-[#D4AF37]/60 shadow-lg transition-colors group"
             >
               <div>
                 <div className="flex items-center justify-between mb-3 text-xs">
@@ -221,7 +228,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   Les mer →
                 </button>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { Mystery, QuizQuestion, RareFact } from '../types';
 import {
   Compass,
@@ -80,7 +81,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Left Column (col-span-8) */}
       <section className="lg:col-span-8 flex flex-col gap-6">
         {/* Hero: Dagens Mysterium Card matching Professional Polish specifications */}
-        <div className="relative rounded-xl overflow-hidden border border-[#2D3139] bg-[#16181D] group min-h-[340px] flex flex-col justify-end">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="relative rounded-xl overflow-hidden border border-[#2D3139] hover:border-[#D4AF37]/50 bg-[#16181D] group min-h-[340px] flex flex-col justify-end shadow-2xl transition-colors"
+        >
           {/* Background atmosphere and subtle ancient parchment texture */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F1115] via-[#16181D]/90 to-[#1C1E24]/70 z-0" />
           
@@ -177,12 +182,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* 2-Column lower cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card 1: Interaktiv Hurtigquiz */}
-          <div className="bg-[#16181D] border border-[#2D3139] p-5 rounded-xl flex flex-col justify-between">
+          <motion.div
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/60 p-5 rounded-xl flex flex-col justify-between shadow-lg transition-colors"
+          >
             <div>
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-bold text-xs uppercase tracking-widest text-[#D4AF37] flex items-center gap-1.5">
@@ -239,10 +248,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             >
               Åpne full Quiz-arena (5 spørsmål) →
             </button>
-          </div>
+          </motion.div>
 
           {/* Card 2: Visste du at? with Tip illustration */}
-          <div className="bg-[#16181D] border border-[#2D3139] p-5 rounded-xl relative overflow-hidden flex flex-col justify-between">
+          <motion.div
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/60 p-5 rounded-xl relative overflow-hidden flex flex-col justify-between shadow-lg transition-colors"
+          >
             <div className="absolute -right-4 -bottom-4 w-28 h-28 border-4 border-[#D4AF37]/10 rounded-full pointer-events-none" />
 
             <div>
@@ -285,14 +298,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 Les hele saken →
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Right Column (col-span-4) matching Professional Polish specifications */}
       <section className="lg:col-span-4 flex flex-col gap-6">
         {/* Kunnskapshull Card */}
-        <div className="bg-[#16181D] border border-[#2D3139] rounded-xl flex flex-col">
+        <motion.div
+          whileHover={{ y: -4 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/60 rounded-xl flex flex-col shadow-lg transition-colors"
+        >
           <div className="p-5 border-b border-[#2D3139]">
             <h3 className="font-bold text-xs uppercase tracking-widest text-[#D4AF37]">
               Kunnskapshull
@@ -359,10 +376,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Tip illustration Card / Cabinet of Curiosities */}
-        <div className="bg-[#16181D] border border-[#2D3139] rounded-xl p-5 relative overflow-hidden flex items-center gap-4">
+        <motion.div
+          whileHover={{ y: -4 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/60 rounded-xl p-5 relative overflow-hidden flex items-center gap-4 shadow-lg transition-colors"
+        >
           <div className="shrink-0">
             <AstrolabeIllustration size={75} />
           </div>
@@ -377,10 +398,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               De største historiske hemmelighetene var aldri gravlagt – de ble bare aldri katalogisert.
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Premium / Pro Archivist Card */}
-        <div className="bg-gradient-to-br from-[#D4AF37] to-[#B8962B] p-5 rounded-xl text-[#0F1115]">
+        <motion.div
+          whileHover={{ y: -4 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="bg-gradient-to-br from-[#D4AF37] to-[#B8962B] p-5 rounded-xl text-[#0F1115] shadow-xl"
+        >
           <h4 className="font-bold text-xs uppercase tracking-wider mb-1">
             Arkivarens Medlemskap
           </h4>
@@ -398,7 +423,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Aktiver
             </button>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Social Media Share Modal with High Security Features */}

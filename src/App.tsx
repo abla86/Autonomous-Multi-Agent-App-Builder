@@ -54,6 +54,8 @@ import {
   copyTextSafelyToClipboard,
   sanitizeMysteryId,
 } from './utils/security';
+import { motion } from 'motion/react';
+import { SearchLogAndChart, SearchLogItem } from './components/SearchLogAndChart';
 
 type ActiveTab = 'dashboard' | 'library' | 'quiz' | 'mysteries' | 'proposals';
 
@@ -164,6 +166,66 @@ export default function App() {
       // Fallback: open share modal so user can copy or share manually
       setIsShareModalOpen(true);
     }
+  };
+
+  // Search History Log state with local persistence & graph metrics
+  const [searchLog, setSearchLog] = useState<SearchLogItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('sjelden_kunnskap_search_log');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // fallback
+    }
+    return [
+      { id: 'log-1', query: 'Voynich-manuskriptet', timestamp: Date.now() - 1000 * 60 * 18, matchCount: 1, category: 'Historie' },
+      { id: 'log-2', query: 'Kvantebiologi', timestamp: Date.now() - 1000 * 60 * 65, matchCount: 1, category: 'Vitenskap' },
+      { id: 'log-3', query: 'Antikythera', timestamp: Date.now() - 1000 * 60 * 240, matchCount: 1, category: 'Glemte Oppfinnelser' },
+      { id: 'log-4', query: 'Bioluminescens', timestamp: Date.now() - 1000 * 60 * 420, matchCount: 1, category: 'Natur & Dypet' },
+    ];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sjelden_kunnskap_search_log', JSON.stringify(searchLog));
+    } catch {
+      // ignore
+    }
+  }, [searchLog]);
+
+  const handleAddSearchLog = (query: string, cat?: Category) => {
+    const trimmed = query.trim();
+    if (!trimmed || trimmed.length < 2) return;
+    const matchCount = facts.filter(
+      (f) =>
+        f.title.toLowerCase().includes(trimmed.toLowerCase()) ||
+        f.summary.toLowerCase().includes(trimmed.toLowerCase())
+    ).length;
+
+    setSearchLog((prev) => {
+      const filtered = prev.filter((item) => item.query.toLowerCase() !== trimmed.toLowerCase());
+      const newItem: SearchLogItem = {
+        id: `log-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        query: trimmed,
+        timestamp: Date.now(),
+        matchCount,
+        category: cat || (selectedCategory === 'Alle' ? 'Vitenskap' : selectedCategory),
+      };
+      return [newItem, ...filtered].slice(0, 20);
+    });
+  };
+
+  const handleSelectQuery = (query: string) => {
+    setSearchQuery(query);
+    setActiveTab('library');
+    handleAddSearchLog(query);
+  };
+
+  const handleDeleteQuery = (id: string) => {
+    setSearchLog((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleClearLog = () => {
+    setSearchLog([]);
   };
 
   // Handle Likes
@@ -525,9 +587,11 @@ export default function App() {
               {/* Left 8 columns: Hero Spotlight + 2-col Split Widget */}
               <section className="col-span-12 lg:col-span-8 flex flex-col gap-6">
                 {/* HERO SPOTLIGHT: Dagens Mysterium */}
-                <div
+                <motion.div
                   id="dashboard-mystery-hero"
-                  className="relative h-88 rounded-xl overflow-hidden border border-[#2D3139] group shadow-2xl bg-gradient-to-br from-[#16181D] via-[#111318] to-[#0A0B0E]"
+                  whileHover={{ y: -3 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className="relative h-88 rounded-xl overflow-hidden border border-[#2D3139] hover:border-[#D4AF37]/50 group shadow-2xl bg-gradient-to-br from-[#16181D] via-[#111318] to-[#0A0B0E] transition-colors"
                 >
                   {/* Decorative background texture simulating an ancient codex */}
                   <div
@@ -647,14 +711,16 @@ export default function App() {
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
 
                 {/* 2-Column Split: Interaktiv Quiz & Dagens Visste-du-at */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
                   {/* CARD 1: Interaktiv Quiz Box */}
-                  <div
+                  <motion.div
                     id="dash-interactive-quiz-card"
-                    className="bg-[#16181D] border border-[#2D3139] p-5 rounded-xl flex flex-col justify-between"
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/60 p-5 rounded-xl flex flex-col justify-between shadow-lg transition-colors"
                   >
                     <div>
                       <div className="flex justify-between items-start mb-3">
@@ -731,12 +797,14 @@ export default function App() {
                         Velg et alternativ for umiddelbar verifisering
                       </div>
                     )}
-                  </div>
+                  </motion.div>
 
                   {/* CARD 2: Visste du at? */}
-                  <div
+                  <motion.div
                     id="dash-did-you-know-card"
-                    className="bg-[#16181D] border border-[#2D3139] p-5 rounded-xl relative overflow-hidden flex flex-col justify-between"
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/60 p-5 rounded-xl relative overflow-hidden flex flex-col justify-between shadow-lg transition-colors"
                   >
                     <div className="absolute -right-4 -bottom-4 w-28 h-28 border-4 border-[#D4AF37]/10 rounded-full pointer-events-none" />
 
@@ -790,16 +858,18 @@ export default function App() {
                         Les arkivnotat <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </section>
 
               {/* Right 4 columns: Kunnskapshull + Premium Medlemskap / Archive Milestone */}
               <section className="col-span-12 lg:col-span-4 flex flex-col gap-6">
                 {/* Kunnskapshull: Trender i det ukjente */}
-                <div
+                <motion.div
                   id="dashboard-knowledge-gaps-card"
-                  className="bg-[#16181D] border border-[#2D3139] rounded-xl flex-1 flex flex-col"
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/60 rounded-xl flex-1 flex flex-col shadow-lg transition-colors"
                 >
                   <div className="p-5 border-b border-[#2D3139] flex items-center justify-between">
                     <div>
@@ -911,12 +981,14 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* TIP ILLUSTRATION & KURATORTIPS WIDGET */}
-                <div
+                <motion.div
                   id="dashboard-curator-tip-card"
-                  className="bg-[#16181D] border border-[#2D3139] rounded-xl p-5 relative overflow-hidden flex items-center gap-4 group hover:border-[#D4AF37]/50 transition-colors"
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="bg-[#16181D] border border-[#2D3139] rounded-xl p-5 relative overflow-hidden flex items-center gap-4 group hover:border-[#D4AF37]/60 shadow-lg transition-colors"
                 >
                   <div className="shrink-0 p-1.5 bg-[#111318] rounded-lg border border-[#2D3139] group-hover:border-[#D4AF37]/40 transition-colors">
                     <AstrolabeIllustration size={72} />
@@ -934,11 +1006,13 @@ export default function App() {
                       Arkivets mysterier løses ved å koble obskure fakta fra vitenskap, historie og natur. Hver sjeldenhet du undersøker gir nøkler til tapte kilder.
                     </p>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Arkivets Spesialstatus / Premium-kort fra temaet */}
-                <div
+                <motion.div
                   id="dashboard-membership-card"
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
                   className="bg-gradient-to-br from-[#D4AF37] to-[#B8962B] p-5 rounded-xl text-[#0F1115] shadow-xl relative overflow-hidden"
                 >
                   <div className="absolute top-2 right-2 opacity-10">
@@ -966,7 +1040,7 @@ export default function App() {
                       Aktiv Mester
                     </button>
                   </div>
-                </div>
+                </motion.div>
               </section>
             </div>
           )}
@@ -1014,6 +1088,16 @@ export default function App() {
                 </div>
               </div>
 
+              {/* Søkelogg & Arkiv-Graf (Recharts Aktivitet og Kategori-fordeling) */}
+              <SearchLogAndChart
+                searchLog={searchLog}
+                onSelectQuery={handleSelectQuery}
+                onDeleteQuery={handleDeleteQuery}
+                onClearLog={handleClearLog}
+                onSelectCategory={(cat) => setSelectedCategory(cat)}
+                selectedCategory={selectedCategory}
+              />
+
               {/* Category Pills */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
                 {(
@@ -1047,9 +1131,11 @@ export default function App() {
                   const isLiked = stats.likedFactIds.includes(fact.id);
 
                   return (
-                    <article
+                    <motion.article
                       key={fact.id}
-                      className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/50 rounded-xl p-5 flex flex-col justify-between transition-all duration-200 group shadow-md"
+                      whileHover={{ y: -4 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className="bg-[#16181D] border border-[#2D3139] hover:border-[#D4AF37]/60 rounded-xl p-5 flex flex-col justify-between transition-colors group shadow-md"
                     >
                       <div>
                         {/* Card Header: Category & Rarity Badge */}
@@ -1128,7 +1214,7 @@ export default function App() {
                           </button>
                         </div>
                       </div>
-                    </article>
+                    </motion.article>
                   );
                 })}
               </div>
