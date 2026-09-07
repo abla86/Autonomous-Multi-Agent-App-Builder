@@ -25,6 +25,9 @@ import {
   KeyRound,
   ShieldAlert,
   ArrowRight,
+  Copy,
+  Check,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   Category,
@@ -45,6 +48,12 @@ import {
   CipherTipIllustration,
   ManuscriptTipIllustration,
 } from './components/TipIllustrations';
+import { ShareMysteryModal } from './components/ShareMysteryModal';
+import {
+  generateSecureMysteryShareUrl,
+  copyTextSafelyToClipboard,
+  sanitizeMysteryId,
+} from './utils/security';
 
 type ActiveTab = 'dashboard' | 'library' | 'quiz' | 'mysteries' | 'proposals';
 
@@ -116,6 +125,46 @@ export default function App() {
   const [isGeneratingDossier, setIsGeneratingDossier] = useState(false);
   const [activeDossierModal, setActiveDossierModal] = useState<TopicDossier | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+
+  // Social Share & Secure Clipboard State for Dagens Mysterium
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [heroCopied, setHeroCopied] = useState(false);
+  const [heroFeedbackToast, setHeroFeedbackToast] = useState<string | null>(null);
+
+  // Deep-linking with strict parameter sanitization & validation
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search) {
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const mysteryParam = searchParams.get('mystery');
+        if (mysteryParam) {
+          const sanitizedId = sanitizeMysteryId(mysteryParam);
+          const matched = mysteries.find((m) => m.id === sanitizedId);
+          if (matched) {
+            setActiveMysteryId(matched.id);
+          }
+        }
+      } catch {
+        // Safe fallback against malformed query strings
+      }
+    }
+  }, [mysteries]);
+
+  const handleHeroQuickCopy = async (mysteryId: string) => {
+    const url = generateSecureMysteryShareUrl(mysteryId);
+    const success = await copyTextSafelyToClipboard(url);
+    if (success) {
+      setHeroCopied(true);
+      setHeroFeedbackToast('Sikker permalenke kopiert til utklippstavlen!');
+      setTimeout(() => {
+        setHeroCopied(false);
+        setHeroFeedbackToast(null);
+      }, 3000);
+    } else {
+      // Fallback: open share modal so user can copy or share manually
+      setIsShareModalOpen(true);
+    }
+  };
 
   // Handle Likes
   const toggleLikeFact = (factId: string) => {
@@ -496,19 +545,35 @@ export default function App() {
                     <CipherTipIllustration size={180} />
                   </div>
 
-                  {/* Corner archival seal */}
+                  {/* Corner archival seal & quick share */}
                   <div className="absolute top-6 right-6 border border-[#D4AF37]/30 bg-[#16181D]/80 backdrop-blur px-3 py-1.5 rounded-sm flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-[10px] uppercase tracking-widest text-gray-300 font-mono">
                       Aktiv Sak · {activeMystery.era}
                     </span>
+                    <span className="text-[#2D3139]">|</span>
+                    <button
+                      id="hero-corner-share-btn"
+                      onClick={() => setIsShareModalOpen(true)}
+                      title="Del på sosiale medier eller kopier permalenke"
+                      className="text-gray-400 hover:text-[#D4AF37] transition-colors p-0.5 cursor-pointer flex items-center gap-1 text-[10px] uppercase tracking-wider"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span className="hidden sm:inline">Del</span>
+                    </button>
                   </div>
 
                   {/* Content in bottom of Hero */}
                   <div className="absolute bottom-0 left-0 p-8 w-full">
-                    <div className="inline-block px-3 py-1 bg-[#D4AF37] text-[#0F1115] text-[10px] font-bold uppercase tracking-widest mb-3 rounded-sm">
-                      Dagens Mysterium
+                    <div className="flex flex-wrap items-center gap-2.5 mb-3">
+                      <div className="inline-block px-3 py-1 bg-[#D4AF37] text-[#0F1115] text-[10px] font-bold uppercase tracking-widest rounded-sm shadow-sm">
+                        Dagens Mysterium
+                      </div>
+                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded font-mono">
+                        <ShieldCheck className="w-3 h-3" /> Verifisert Permalenke
+                      </span>
                     </div>
+
                     <h2 className="text-3xl sm:text-4xl font-serif italic text-white mb-2 tracking-tight">
                       {activeMystery.title}
                     </h2>
@@ -516,15 +581,51 @@ export default function App() {
                       {activeMystery.brief}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-3">
                       <button
                         id="hero-start-decoding-btn"
                         onClick={() => setActiveTab('mysteries')}
-                        className="px-8 py-3 bg-white hover:bg-[#D4AF37] text-[#0F1115] font-bold text-xs uppercase tracking-widest rounded-sm transition-all shadow-lg flex items-center gap-2"
+                        className="px-6 sm:px-8 py-3 bg-white hover:bg-[#D4AF37] text-[#0F1115] font-bold text-xs uppercase tracking-widest rounded-sm transition-all shadow-lg flex items-center gap-2 cursor-pointer"
                       >
                         <KeyRound className="w-4 h-4" />
                         Begynn Dekoding
                       </button>
+
+                      {/* SOCIAL MEDIA SHARE BUTTON */}
+                      <button
+                        id="hero-social-share-btn"
+                        onClick={() => setIsShareModalOpen(true)}
+                        className="px-5 py-3 bg-[#1C1E24] hover:bg-[#2D3139] border border-[#2D3139] hover:border-[#D4AF37]/60 text-gray-200 hover:text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-all flex items-center gap-2 cursor-pointer shadow-md group"
+                        title="Del mysteriet på sosiale medier (X, Facebook, LinkedIn, WhatsApp, E-post)"
+                      >
+                        <Share2 className="w-4 h-4 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+                        Del Sak
+                      </button>
+
+                      {/* QUICK CLIPBOARD COPY BUTTON WITH SAFE FALLBACK */}
+                      <button
+                        id="hero-copy-mystery-link-btn"
+                        onClick={() => handleHeroQuickCopy(activeMystery.id)}
+                        className={`px-4 py-3 rounded-sm border text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-md ${
+                          heroCopied
+                            ? 'bg-emerald-900/80 border-emerald-500 text-emerald-200'
+                            : 'bg-[#16181D]/90 hover:bg-[#1C1E24] border-[#2D3139] hover:border-[#D4AF37]/40 text-gray-300 hover:text-white'
+                        }`}
+                        title="Kopier sikker permalenke til utklippstavlen"
+                      >
+                        {heroCopied ? (
+                          <>
+                            <Check className="w-4 h-4 text-emerald-400" />
+                            Lenke Kopiert!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-4 h-4 text-[#D4AF37]" />
+                            Kopier Lenke
+                          </>
+                        )}
+                      </button>
+
                       <button
                         onClick={() => {
                           const nextIdx =
@@ -532,11 +633,19 @@ export default function App() {
                             mysteries.length;
                           setActiveMysteryId(mysteries[nextIdx].id);
                         }}
-                        className="px-4 py-3 bg-[#1C1E24] hover:bg-[#2D3139] text-gray-300 text-xs font-semibold uppercase tracking-wider rounded-sm border border-[#2D3139] transition-colors"
+                        className="px-4 py-3 bg-[#1C1E24] hover:bg-[#2D3139] text-gray-300 text-xs font-semibold uppercase tracking-wider rounded-sm border border-[#2D3139] transition-colors cursor-pointer"
                       >
                         Vis Neste Sak ({activeMysteryId === 'voynich' ? 'Antikythera' : 'Mary Celeste'})
                       </button>
                     </div>
+
+                    {/* Quick Toast Notification */}
+                    {heroFeedbackToast && (
+                      <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-950/90 border border-emerald-700/80 rounded text-xs text-emerald-300 font-sans shadow-lg animate-fadeIn">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                        {heroFeedbackToast}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1810,6 +1919,15 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* =========================================================================
+          MODAL: SOCIAL MEDIA SHARE & SECURE LINK FOR DAGENS MYSTERIUM
+      ========================================================================= */}
+      <ShareMysteryModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        mystery={activeMystery}
+      />
     </div>
   );
 }

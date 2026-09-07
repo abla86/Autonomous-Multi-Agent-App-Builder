@@ -11,7 +11,9 @@ import {
   Share2,
   Lock,
   Flame,
-  Award
+  Award,
+  Copy,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   AstrolabeIllustration,
@@ -19,6 +21,11 @@ import {
   CipherTipIllustration,
   ManuscriptTipIllustration,
 } from './TipIllustrations';
+import { ShareMysteryModal } from './ShareMysteryModal';
+import {
+  generateSecureMysteryShareUrl,
+  copyTextSafelyToClipboard,
+} from '../utils/security';
 
 interface DashboardViewProps {
   mystery: Mystery;
@@ -43,6 +50,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [quickAnswerIdx, setQuickAnswerIdx] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
 
+  // Social share & secure clipboard state
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const handleQuickCopy = async () => {
+    const url = generateSecureMysteryShareUrl(mystery.id);
+    const success = await copyTextSafelyToClipboard(url);
+    if (success) {
+      setCopiedLink(true);
+      setToastMessage('Sikker permalenke kopiert til utklippstavlen!');
+      setTimeout(() => {
+        setCopiedLink(false);
+        setToastMessage(null);
+      }, 3000);
+    } else {
+      setIsShareModalOpen(true);
+    }
+  };
+
   const handleQuickAnswer = (idx: number) => {
     setQuickAnswerIdx(idx);
     setShowFeedback(true);
@@ -62,9 +89,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <CipherTipIllustration size={220} />
           </div>
 
+          {/* Top-right quick share badge */}
+          <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+            <button
+              id="dashboard-hero-corner-share-btn"
+              onClick={() => setIsShareModalOpen(true)}
+              title="Del på sosiale medier eller kopier lenke"
+              className="px-2.5 py-1 bg-[#16181D]/80 hover:bg-[#2D3139] border border-[#2D3139] hover:border-[#D4AF37] text-gray-300 hover:text-[#D4AF37] text-[10px] uppercase font-mono tracking-wider rounded transition-colors flex items-center gap-1.5 cursor-pointer shadow"
+            >
+              <Share2 className="w-3 h-3 text-[#D4AF37]" />
+              <span>Del</span>
+            </button>
+          </div>
+
           <div className="relative z-10 p-6 sm:p-8 w-full">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37] text-[#0F1115] text-[10px] font-bold uppercase tracking-widest mb-4 rounded-sm shadow-sm">
-              <Compass className="w-3.5 h-3.5" /> Dagens Mysterium
+            <div className="flex flex-wrap items-center gap-2.5 mb-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37] text-[#0F1115] text-[10px] font-bold uppercase tracking-widest rounded-sm shadow-sm">
+                <Compass className="w-3.5 h-3.5" /> Dagens Mysterium
+              </div>
+              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded font-mono">
+                <ShieldCheck className="w-3 h-3" /> Verifisert Permalenke
+              </span>
             </div>
 
             <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#E0E2E6] mb-2 tracking-tight">
@@ -75,7 +120,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {mystery.brief}
             </p>
 
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <button
                 id="dashboard-start-decoding-btn"
                 onClick={onGoToMystery}
@@ -84,10 +129,53 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 Begynn Dekoding <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
-              <span className="text-xs text-gray-400">
+              {/* Social Media Share Button */}
+              <button
+                id="dashboard-social-share-btn"
+                onClick={() => setIsShareModalOpen(true)}
+                className="px-4 sm:px-5 py-3 bg-[#1C1E24] hover:bg-[#2D3139] border border-[#2D3139] hover:border-[#D4AF37]/60 text-gray-200 hover:text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-all flex items-center gap-2 cursor-pointer shadow-md group"
+                title="Del mysteriet på sosiale medier (X, Facebook, LinkedIn, WhatsApp, E-post)"
+              >
+                <Share2 className="w-4 h-4 text-[#D4AF37] group-hover:scale-110 transition-transform" />
+                Del Sak
+              </button>
+
+              {/* Quick Copy Link to Clipboard Button */}
+              <button
+                id="dashboard-copy-link-btn"
+                onClick={handleQuickCopy}
+                className={`px-4 py-3 rounded-sm border text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-md ${
+                  copiedLink
+                    ? 'bg-emerald-900/80 border-emerald-500 text-emerald-200'
+                    : 'bg-[#16181D] hover:bg-[#1C1E24] border-[#2D3139] hover:border-[#D4AF37]/40 text-gray-300 hover:text-white'
+                }`}
+                title="Kopier sikker permalenke til utklippstavlen"
+              >
+                {copiedLink ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    Lenke Kopiert!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-[#D4AF37]" />
+                    Kopier Lenke
+                  </>
+                )}
+              </button>
+
+              <span className="text-xs text-gray-400 ml-auto hidden sm:inline">
                 Sjeldenhetsgrad: <strong className="text-[#D4AF37] font-mono">{mystery.rarityFactor}%</strong>
               </span>
             </div>
+
+            {/* Notification toast */}
+            {toastMessage && (
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-950/80 border border-emerald-700/80 rounded text-xs text-emerald-300 font-sans shadow-lg animate-fadeIn">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                {toastMessage}
+              </div>
+            )}
           </div>
         </div>
 
@@ -312,6 +400,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
       </section>
+
+      {/* Social Media Share Modal with High Security Features */}
+      <ShareMysteryModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        mystery={mystery}
+      />
     </div>
   );
 };
