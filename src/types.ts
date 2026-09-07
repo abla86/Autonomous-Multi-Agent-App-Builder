@@ -71,3 +71,43 @@ export interface UserCalibrationResult {
   correctCount: number;
   totalCount: number;
 }
+
+export type XPCategory = "sim" | "blindspot" | "calibration" | "frontier";
+
+export interface XPTransaction {
+  id: string;
+  amount: number;
+  reason: string;
+  category: XPCategory;
+  timestamp: number;
+}
+
+export interface UserLevel {
+  level: number;
+  title: string;
+  minXp: number;
+  maxXp: number;
+  badgeIcon: string;
+  rankColor: string;
+  description: string;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  category: XPCategory;
+  xpReward: number;
+  unlockedAt?: string;
+}
+
+export interface EpistemicTruthGuarantee {
+  version: string;
+  status: "verified";
+  principles: {
+    title: string;
+    description: string;
+    enforcement: string;
+  }[];
+}

@@ -139,6 +139,22 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });
 });
 
+// API: Epistemic truth mandate status
+app.get("/api/epistemic/truth-mandate", (_req, res) => {
+  res.json({
+    status: "active",
+    guarantee: "Absolutt forbud mot usannheter, fabrikasjoner og pseudovitenskap",
+    enforcement: "Strict Epistemic Consensus Guardrails",
+    timestamp: new Date().toISOString(),
+    rules: [
+      "1. Kun etablert vitenskapelig konsensus og etterprøvbare empiriske data aksepteres som fakta.",
+      "2. Uløste fenomener skal eksplisitt erklæres som uoppklarte mysterier med åpne hypoteser.",
+      "3. Utbredte myter og tankefeller skal eksplisitt dekonstrueres.",
+      "4. Nulltoleranse for AI-hallusinasjoner eller oppdiktede mekanismer."
+    ]
+  });
+});
+
 // API: Socratic Blindspot Probe
 app.post("/api/blindspot/probe", async (req, res) => {
   try {
@@ -201,8 +217,16 @@ app.post("/api/blindspot/probe", async (req, res) => {
       return;
     }
 
-    // Call Gemini 3.8 Flash for real-time Socratic probe
-    const prompt = `Du er Sokrates og en leken vitenskapsformidler. Brukeren ønsker å teste sine kognitive blindsoner og kunnskapshull om temaet: "${topic}".
+    // Call Gemini 3.8 Flash for real-time Socratic probe with strict Epistemic Truthfulness Mandate
+    const prompt = `Du er Sokrates og en kompromissløs, nøyaktig vitenskapsformidler.
+Brukeren ønsker å teste sine kognitive blindsoner og kunnskapshull om temaet: "${topic}".
+
+STRENG EPISTEMISK SANNHETSGARANTI (IKKE LOV Å GI USANNHETER):
+- DU HAR ET ABSOLUTT, UFRAVIKELIG FORBUD MOT Å GI USANNHETER, FABRIKASJONER ELLER PÅSTANDER UTEN VITENSKAPELIG DEKNING.
+- Alt du formidler MÅ bygge på verifiserte fakta og anerkjent vitenskapelig konsensus.
+- Hvis emnet inneholder en utbredt myte (f.eks. 'koffein gir energi', 'sykler balanserer kun pga hjulenes gyroeffekt', 'vi bruker bare 10% av hjernen'), MÅ du eksplisitt avdekke at dette er en usannhet og forklare den sanne fysiske/biologiske mekanismen.
+- Hvis et aspekt er et uløst mysterium der vitenskapen fremdeles er usikker, HAR DU IKKE LOV til å late som svaret er kjent. Du MÅ si rett ut at vitenskapen IKKE vet det, og liste opp de ledende, fagfellevurderte hypotesene.
+
 Generer en leken, motintuitiv og dypt fascinerende blindsonetest på NORSK. 
 Fokuser på:
 1. "The Illusion of Explanatory Depth" (hvorfor folk tror de forstår dette bedre enn de gjør).
@@ -212,23 +236,23 @@ Fokuser på:
 Svar strengt i JSON med nøyaktig følgende format:
 {
   "topic": "${topic}",
-  "curiosityHook": "En kort, fengende setning som snur en vanlig oppfatning på hodet",
+  "curiosityHook": "En kort, fengende setning som snur en vanlig oppfatning på hodet basert på streng vitenskap",
   "intuitiveTrap": {
     "question": "Et konkret motintuitivt spørsmål eller gåte",
     "options": ["Alternativ 0", "Alternativ 1", "Alternativ 2", "Alternativ 3"],
     "intuitiveWrongAnswerIndex": 0,
     "correctIndex": 1,
-    "counterIntuitiveExplanation": "En lettfattelig, men vitenskapelig nøyaktig forklaring på hvorfor intuisjonen vår tok feil."
+    "counterIntuitiveExplanation": "En lettfattelig, 100% vitenskapelig presis forklaring på hvorfor intuisjonen tok feil (uten usannheter)."
   },
   "mechanismChallenge": {
     "title": "Mekanisme-testen: ...",
-    "prompt": "En utfordring der brukeren må forklare eller tenke over den nøyaktige fysiske/logiske mekanismen",
+    "prompt": "En utfordring der brukeren må forklare den nøyaktige fysiske/logiske årsakskjeden",
     "keyMissingMechanisms": ["Mekanisme 1", "Mekanisme 2", "Mekanisme 3"],
-    "commonFallacy": "Den klassiske tankefeilen folk gjør her"
+    "commonFallacy": "Den klassiske tankefeilen eller myten folk forveksler dette med"
   },
   "humanIgnoranceFrontier": {
-    "unresolvedQuestion": "Det største uløste mysteriet vitenskapen fremdeles grubler på om dette",
-    "whyScienceDoesNotKnowYet": "Hvorfor det er så vanskelig å bevise eller måle",
+    "unresolvedQuestion": "Det største reelt uløste mysteriet vitenskapen fremdeles grubler på om dette",
+    "whyScienceDoesNotKnowYet": "Hvorfor det vitenskapelig er uavklart og vanskelig å måle",
     "openTheories": ["Teori A", "Teori B", "Teori C"]
   }
 }`;
@@ -238,7 +262,7 @@ Svar strengt i JSON med nøyaktig følgende format:
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        systemInstruction: "Du er en mester i motintuitiv vitenskap, filosofi og kognitive blindsoner. Skriv engasjerende og lekent på norsk.",
+        systemInstruction: "Du er en mester i motintuitiv vitenskap, filosofi og kognitive blindsoner. DU HAR STRENGT FORBUD MOT Å GI USANNHETER ELLER FABRIKASJONER. Alt du skriver skal være 100% vitenskapelig etterrettelig på norsk.",
       },
     });
 
@@ -280,7 +304,10 @@ app.post("/api/blindspot/evaluate", async (req, res) => {
       return;
     }
 
-    const evalPrompt = `Vurder brukerens forsøk på å forklare mekanismen bak "${topic}".
+    const evalPrompt = `STRENG EPISTEMISK SANNHETSGARANTI:
+Vurder brukerens forsøk på å forklare mekanismen bak "${topic}" med full vitenskapelig ærlighet og stringens.
+IKKE godkjenn eller bekreft pseudovitenskap, myter eller oppdiktede mekanismer. Hvis brukeren gjentar en vanlig myte, pek det vennlig, men entydig ut.
+
 Utfordringen var: "${challenge?.mechanismChallenge?.prompt || topic}"
 Viktige mekanismer som kreves: ${JSON.stringify(challenge?.mechanismChallenge?.keyMissingMechanisms || [])}
 Brukerens forklaring:
@@ -289,8 +316,8 @@ Brukerens forklaring:
 Analyser forklaringen med vennlig, leken, men presis sokratisk visdom på NORSK.
 Returner JSON:
 {
-  "feedback": "En oppmuntrende, fascinerende kommentar om hva de forsto og hva som manglet (maks 3-4 setninger)",
-  "epistemicAccuracyScore": 65, // tall mellom 10 og 95
+  "feedback": "En oppmuntrende, fascinerende kommentar om hva de forsto og hva som manglet (maks 3-4 setninger, vitenskapelig etterrettelig)",
+  "epistemicAccuracyScore": 65, // tall mellom 10 og 95 basert på faktisk mekanistisk nøyaktighet
   "revealedBlindspots": ["Spesifikk blindflekk 1 de overså", "Spesifikk blindflekk 2"],
   "deepDivingQuestion": "Et tankevekkende oppfølgingsspørsmål",
   "epistemicTitle": "F.eks: 'Intuitiv Alchemist' eller 'Empirisk Sokrates' eller 'Konseptuell Arkitekt'"
@@ -301,6 +328,7 @@ Returner JSON:
       contents: evalPrompt,
       config: {
         responseMimeType: "application/json",
+        systemInstruction: "Du er en sokratisk sensor med strengt forbud mot å bekrefte usannheter. Vurder vitenskapelig presisjon på norsk.",
       },
     });
 
@@ -333,6 +361,7 @@ app.post("/api/thought-experiment", async (req, res) => {
     }
 
     const prompt = `Lag et interaktivt, fascinerende tankeeksperiment (Gedankenexperiment) om det uløste vitenskapelige mysteriet "${mysteryTitle}": ${details || ""}.
+STRENG EPISTEMISK SANNHETSGARANTI: Ikke dikt opp naturlover eller påstå at gåten er løst. Tankeeksperimentet må belyse den reelle grensen for menneskelig kunnskap.
 Språk: Norsk.
 Returner JSON:
 {
@@ -350,6 +379,7 @@ Returner JSON:
       contents: prompt,
       config: {
         responseMimeType: "application/json",
+        systemInstruction: "Du designer fysikalske og filosofiske tankeeksperimenter uten usannheter. Norsk språk.",
       }
     });
 
@@ -360,6 +390,7 @@ Returner JSON:
     res.status(500).json({ error: error.message || "Kunne ikke generere tankeeksperiment" });
   }
 });
+
 
 // Setup Vite middleware in dev or static serving in prod
 async function start() {

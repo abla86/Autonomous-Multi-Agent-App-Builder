@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
-import { Play, RotateCcw, Award, HelpCircle, Zap } from "lucide-react";
+import { Play, RotateCcw, Award, HelpCircle, Zap, Sparkles } from "lucide-react";
+import { useUserProgress } from "../../context/UserProgressContext";
 
 export function MontyHallSimulator() {
+  const { awardXP } = useUserProgress();
   const [carDoor, setCarDoor] = useState<number>(() => Math.floor(Math.random() * 3));
   const [selectedDoor, setSelectedDoor] = useState<number | null>(null);
   const [revealedGoatDoor, setRevealedGoatDoor] = useState<number | null>(null);
@@ -46,6 +48,9 @@ export function MontyHallSimulator() {
       if (chosen === carDoor) {
         setSwitchWins((prev) => prev + 1);
         confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+        awardXP(35, "Monty Hall: Byttet dør og vant bilen!", "sim");
+      } else {
+        awardXP(15, "Monty Hall: Fullførte runde med byttestrategi", "sim");
       }
     } else {
       chosen = selectedDoor;
@@ -54,6 +59,9 @@ export function MontyHallSimulator() {
       if (chosen === carDoor) {
         setStayWins((prev) => prev + 1);
         confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+        awardXP(25, "Monty Hall: Beholdt opprinnelig dør og vant!", "sim");
+      } else {
+        awardXP(15, "Monty Hall: Fullførte runde med 'stå i det'-strategi", "sim");
       }
     }
     setGameStage("finished");
@@ -89,6 +97,12 @@ export function MontyHallSimulator() {
       setStayTotal(newStayTotal);
       setIsAutoRunning(false);
       confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
+
+      if (count >= 1000) {
+        awardXP(100, "Store Talls Lov: 1 000 Monty Hall simuleringer fullført!", "sim", "monty_master");
+      } else {
+        awardXP(40, `Monty Hall: Simulerte ${count} runder for å teste sannsynligheten`, "sim");
+      }
     }, 350);
   };
 

@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Clock, Rocket, Zap, Award } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Clock, Rocket, Zap, Award, Sparkles } from "lucide-react";
+import { useUserProgress } from "../../context/UserProgressContext";
 
 export function TimeDilationSimulator() {
+  const { awardXP } = useUserProgress();
   const [velocityPercent, setVelocityPercent] = useState<number>(86.6); // 86.6% gives gamma = 2.0!
   const [earthSeconds, setEarthSeconds] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(true);
+  const hasAwardedRelativistic = useRef(false);
 
   // v as fraction of c (0 to 0.999)
   const v = velocityPercent / 100;
@@ -12,6 +15,14 @@ export function TimeDilationSimulator() {
   const gamma = 1 / Math.sqrt(Math.max(0.0001, 1 - v * v));
   // Ship time = earthSeconds / gamma
   const shipSeconds = earthSeconds / gamma;
+
+  const handleVelocityChange = (newVel: number) => {
+    setVelocityPercent(newVel);
+    if (newVel >= 90 && !hasAwardedRelativistic.current) {
+      hasAwardedRelativistic.current = true;
+      awardXP(60, "Spesiell Relativitet: Tidsdilatasjon over 90% av lysfarten (c)!", "sim", "time_speed");
+    }
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -70,7 +81,7 @@ export function TimeDilationSimulator() {
             max="99.5"
             step="0.1"
             value={velocityPercent}
-            onChange={(e) => setVelocityPercent(Number(e.target.value))}
+            onChange={(e) => handleVelocityChange(Number(e.target.value))}
             className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-400 mt-2"
           />
           <div className="flex justify-between text-[11px] text-slate-500 mt-1 font-mono">

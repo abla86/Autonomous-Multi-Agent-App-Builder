@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Layers, Rocket, Globe, Sparkles } from "lucide-react";
+import { useUserProgress } from "../../context/UserProgressContext";
 
 interface Milestone {
   folds: number;
@@ -21,7 +22,24 @@ const MILESTONES: Milestone[] = [
 ];
 
 export function PaperFoldSimulator() {
+  const { awardXP } = useUserProgress();
   const [folds, setFolds] = useState<number>(0);
+  const claimedMilestones = useRef<Set<number>>(new Set());
+
+  const handleSetFolds = (newFolds: number) => {
+    setFolds(newFolds);
+
+    if (newFolds >= 51 && !claimedMilestones.current.has(51)) {
+      claimedMilestones.current.add(51);
+      awardXP(120, "Papirbrette: Brettet helt ut til Solen (225 mill. km)!", "sim", "paper_sun");
+    } else if (newFolds >= 42 && !claimedMilestones.current.has(42)) {
+      claimedMilestones.current.add(42);
+      awardXP(75, "Papirbrette: Passerte Månen ved 42 brett!", "sim", "paper_moon");
+    } else if (newFolds >= 23 && !claimedMilestones.current.has(23)) {
+      claimedMilestones.current.add(23);
+      awardXP(40, "Papirbrette: Passerte Burj Khalifa (839m) ved 23 brett!", "sim");
+    }
+  };
 
   // Thickness in meters: 0.0001m * 2^folds
   const thicknessMeters = 0.0001 * Math.pow(2, folds);
@@ -93,7 +111,7 @@ export function PaperFoldSimulator() {
               min="0"
               max="52"
               value={folds}
-              onChange={(e) => setFolds(Number(e.target.value))}
+              onChange={(e) => handleSetFolds(Number(e.target.value))}
               className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
             />
             <div className="flex justify-between text-[11px] text-slate-500 mt-1 font-mono">
@@ -122,7 +140,7 @@ export function PaperFoldSimulator() {
             {[0, 14, 23, 30, 42, 51].map((f) => (
               <button
                 key={f}
-                onClick={() => setFolds(f)}
+                onClick={() => handleSetFolds(f)}
                 className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-colors ${
                   folds === f
                     ? "bg-cyan-500 text-slate-950 font-bold"

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Compass, RotateCw, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Compass, RotateCw, AlertTriangle, CheckCircle, Info, Sparkles } from "lucide-react";
+import { useUserProgress } from "../../context/UserProgressContext";
 
 export function BicyclePhysicsSimulator() {
+  const { awardXP } = useUserProgress();
   const [speed, setSpeed] = useState<number>(15); // km/h
   const [gyroEnabled, setGyroEnabled] = useState<boolean>(true);
   const [casterTrail, setCasterTrail] = useState<"positive" | "zero" | "negative">("positive");
@@ -9,6 +11,7 @@ export function BicyclePhysicsSimulator() {
   const [steerAngle, setSteerAngle] = useState<number>(0); // degrees
   const [isSimulatingFall, setIsSimulatingFall] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string>("Sykkelen er i stabil likevekt.");
+  const hasAwardedGyroDefier = useRef(false);
 
   // Simulate self-correcting dynamics or tipping over
   useEffect(() => {
@@ -43,6 +46,10 @@ export function BicyclePhysicsSimulator() {
 
           if (Math.abs(nextLean) < 0.5) {
             setStatusMessage("✅ Gjenopprettet! Forhjulet svingte automatisk inn i fallet og flyttet hjulene under tyngdepunktet.");
+            if (!gyroEnabled && casterTrail === "positive" && !hasAwardedGyroDefier.current) {
+              hasAwardedGyroDefier.current = true;
+              awardXP(60, "Sykkelens Hemmelighet: Selvopprettet UTEN gyroskopisk kraft!", "sim", "bicycle_gyro");
+            }
             return 0;
           }
           return nextLean;
@@ -52,7 +59,7 @@ export function BicyclePhysicsSimulator() {
       setSteerAngle(0);
     }
     return () => clearInterval(interval);
-  }, [leanAngle, speed, casterTrail, gyroEnabled]);
+  }, [leanAngle, speed, casterTrail, gyroEnabled, awardXP]);
 
   const nudgeBike = (direction: "left" | "right") => {
     const nudge = direction === "left" ? -18 : 18;
