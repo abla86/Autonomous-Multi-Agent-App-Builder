@@ -1,0 +1,6 @@
+{
+  "name": "Abonnementsfinner & Oppsigelse",
+  "description": "Finn alle dine abonnementer uansett kilde, velg hva du vil beholde eller avslutte, og tving gjennom formelle oppsigelser og betalingsstopp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
