@@ -1,0 +1,6 @@
+{
+  "name": "Autonomous Multi-Agent App Builder",
+  "description": "Autonomous multi-agent software engineering swarm orchestrator for full-stack build, diagnostic, testing, and production deployment.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
