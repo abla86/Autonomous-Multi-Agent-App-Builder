@@ -1,0 +1,175 @@
+import { RareFact } from '../types';
+
+export const INITIAL_FACTS: RareFact[] = [
+  {
+    id: 'fact-1',
+    title: 'Mummy Brown: Renessansemalernes makabre pigment',
+    category: 'Kunst & Kultur',
+    rarityScore: 97,
+    summary: 'Fra 1500- til tidlig på 1900-tallet var en av de mest ettertraktede oljemalingene for skyggelegging og kjøttoner laget av knuste egyptiske mumier.',
+    fullStory: 'Fargen "Mummy Brown" (Caput Mortuum) ble fremstilt ved å male opp ekte balsamerte mumier – både mennesker og katter – og blande pulveret med bek og myrra. Kjente kunstnere som Eugène Delacroix og prerafaelittene brukte pigmentet flittig på grunn av dets rike, transparente glød. Da kunstneren Edward Burne-Jones på 1800-tallet oppdaget at tuben hans faktisk inneholdt et avdødt menneske, holdt han en høytidelig begravelse for malingstuben i hagen sin. Pigmentet forsvant først da produsenten i London på 1960-tallet gikk tom for mumier.',
+    obscureDetails: [
+      'Det engelske fargefirmaet C. Roberson & Co. solgte pigmentet helt fram til 1964, da de erklærte at mumiemangelen gjorde produksjonen umulig.',
+      'På 1800-tallet ble mumier solgt per pund i europeiske havnebyer som gjødsel, fargepigment og medisin.',
+      'Prerafaelittmaleren Martin Dröllings berømte verk "Interiør i et kjøkken" (1815) inneholder pigment hentet fra likene til franske konger som ble plyndret fra Saint-Denis under revolusjonen.'
+    ],
+    tag: 'Pigmenthistorie',
+    source: 'The Journal of Art Historiography & British National Gallery Archives',
+    likes: 342,
+    readingTimeMin: 2,
+    isDailyHighlight: true,
+  },
+  {
+    id: 'fact-2',
+    title: 'Heros Aeolipile: Verdens første dampmaskin fra år 60 e.Kr.',
+    category: 'Glemte Oppfinnelser',
+    rarityScore: 94,
+    summary: 'Dampmaskinen ble ikke oppfunnet under den industrielle revolusjon, men over 1600 år tidligere i det romerske Alexandria av matematikeren Heron.',
+    fullStory: 'Heron av Alexandria konstruerte en forbløffende enhet kalt "aeolipile" – en hul kobberkule montert på to rør koblet til en kjele med kokende vann. To bøyde dyser slapp ut damp under trykk, noe som fikk kulen til å spinne i voldsom hastighet etter Newtons tredje bevegelseslov, nesten 1600 år før Newton formulerte den. Apparatet ble imidlertid aldri brukt til industrielt arbeid; i antikkens slavedrevne økonomi ble det betraktet som et fascinerende leketøy og tempelmagi.',
+    obscureDetails: [
+      'Heron brukte også dampprinsippet til å bygge helautomatiske tempeldører som åpnet seg magisk når prestene tente en ild på alteret.',
+      'Antikkens overflod av billig slavearbeid fjernet det økonomiske incitamentet til å mekanisere arbeidskraft.',
+      'Dersom Hero hadde skalert opp prinsippet med stempler, kunne den industrielle revolusjonen ha funnet sted i Romerriket.'
+    ],
+    tag: 'Antikk Teknologi',
+    source: 'Heron of Alexandria: Pneumatica & Automata Manuscript Codices',
+    likes: 289,
+    readingTimeMin: 3,
+  },
+  {
+    id: 'fact-3',
+    title: 'Turritopsis dohrnii: Havets biologisk udødelige manet',
+    category: 'Natur & Dypet',
+    rarityScore: 92,
+    summary: 'Når denne bittelille hydrozoen blir skadet eller gammel, forvandler den seg tilbake til sitt tidligste stadium og starter livet på nytt i det uendelige.',
+    fullStory: 'Den knappenålstrore maneten Turritopsis dohrnii har mestret cellulær transdifferensiering. I møte med sult, fysisk skade eller alderdom, bryter den ned sine spesialiserte celler til primitive stamceller. Den synker til havbunnen, forvandler seg til en polypkoloni, og kloner deretter ut nye, unge maneter med nøyaktig samme DNA. Prosessen kan i teorien gjentas i det uendelige, noe som gjør organismen biologisk udødelig mot alderdom.',
+    obscureDetails: [
+      'Transdifferensiering er den samme prosessen stamcelleforskere forsøker å gjenskape for å regenerere menneskelige organer.',
+      'Maneten har spredt seg til alle verdenshav via ballastvann i lasteskip uten å tiltrekke seg oppmerksomhet.',
+      'Selv om den er immun mot alderdom, kan den fremdeles bli spist av rovfisk eller bukke under for parasitter.'
+    ],
+    tag: 'Kvantebiologi',
+    source: 'Biological Bulletin, Marine Biological Laboratory, Woods Hole',
+    likes: 415,
+    readingTimeMin: 2,
+  },
+  {
+    id: 'fact-4',
+    title: 'Den 335 år lange krigen uten et eneste skudd',
+    category: 'Historie',
+    rarityScore: 89,
+    summary: 'Nederland og de britiske Scilly-øyene var i formell krigstilstand fra 1651 til 1986, uten at en eneste kule ble avfyrt eller noen ble såret.',
+    fullStory: 'Under den engelske borgerkrigen søkte rojalistiske kaperskip tilflukt på Scilly-øyene utenfor Cornwall. Den nederlandske admiralen Maarten Tromp krevde erstatning for plyndrede nederlandske handelsskip, og da han ble avvist, erklærte han krig spesifikt mot Scilly-øyene alene. Da rojalistene kort tid etter kapitulerte til parlamentaristene, seilte den nederlandske flåten hjem – uten å formelt slutte fred. Krigstilstanden ble fullstendig glemt i tre århundrer helt til lokalhistorikeren Roy Duncan oppdaget at krigen juridisk sett fortsatt pågikk.',
+    obscureDetails: [
+      'En offisiell fredstraktat ble undertegnet 17. april 1986 av den nederlandske ambassadøren Jonkheer Rein Huydecoper.',
+      'Ambassadøren spøkte med at innbyggerne på Scilly må ha levd i tre århundrer i frykt for at en nederlandsk krigsflåte plutselig skulle dukke opp.',
+      'Dette er anerkjent som en av verdens lengste og mest fredelige konflikter i moderne historie.'
+    ],
+    tag: 'Glemte Kriger',
+    source: 'Isles of Scilly Museum Archives & The Royal Netherlands Ministry of Foreign Affairs',
+    likes: 198,
+    readingTimeMin: 2,
+  },
+  {
+    id: 'fact-5',
+    title: '52-Hertz-hvalen: Havdypets mest ensomme skapning',
+    category: 'Natur & Dypet',
+    rarityScore: 91,
+    summary: 'Siden 1989 har oseanografer sporet et mystisk hvalrop på nøyaktig 52 Hertz – en frekvens ingen annen hval på jorden kan høre eller svare på.',
+    fullStory: 'Normalt kommuniserer blåhvaler og finnhvaler på frekvenser mellom 10 og 39 Hz. Den ensomme hvalen synger i et register som ligner en dyp tuba, med strukturer som minner om blåhvalsang, men på en frekvens som er for høy for artsfrender. Forskere ved Woods Hole Oceanographic Institution har registrert dens årlige vandringer fra Alaska til California i tiår, men individet har aldri blitt observert visuelt. Noen forskere mener det kan være en sjelden hybrid eller en hval med en medfødt fysisk anomali.',
+    obscureDetails: [
+      'Det amerikanske sjøforsvarets hemmelige SOSUS-lytteanlegg (designet for å spore sovjetiske ubåter) var de første som oppdaget signalet.',
+      'Tonen har sunket noe med årene etter hvert som hvalen har eldet, noe som beviser at det er et biologisk vesen i vekst.',
+      'Til tross for å aldri ha mottatt et svar, fortsetter den å synge hver eneste vandringssesong.'
+    ],
+    tag: 'Akustisk Zoologi',
+    source: 'Journal of the Acoustical Society of America & NOAA Hydrophone Datasets',
+    likes: 521,
+    readingTimeMin: 2,
+  },
+  {
+    id: 'fact-6',
+    title: 'London Beer Flood 1814: Den fatale bølgen av porter',
+    category: 'Historie',
+    rarityScore: 93,
+    summary: 'En eksplodert 22 fot høy gjæringstank utløste en flodbølge på 1,4 millioner liter øl som jevnet hus med jorden i Londons slum.',
+    fullStory: 'Den 17. oktober 1814 røk et 300 kilo tungt jernbånd på en gigantisk tretank ved Meux & Co\'s Horse Shoe Brewery i St Giles, London. Trykket knuste nabotankene i en kjedereaksjon. En 4,5 meter høy vegg av mørk porter feide ut i New Street og knuste murvegger, veltet to etasjers bygninger og oversvømte kjellerleiligheter. Åtte mennesker omkom, inkludert en mor og datter som holdt en irsk likvake. Retten slo fast at ulykken var en "Act of God", og bryggeriet slapp erstatningsansvar.',
+    obscureDetails: [
+      'Tusenvis av nysgjerrige innbyggere samlet seg i gatene med potter, panner og teskjeer for å drikke av den rennende ølelven.',
+      'Stanken av gjæret øl hang igjen i nabolaget i flere måneder etter katastrofen.',
+      'Ulykken førte til at tretanker gradvis ble faset ut til fordel for forete betongtanker i hele den britiske bryggeriindustrien.'
+    ],
+    tag: 'Bizzare Katastrofer',
+    source: 'The Times London (October 1814 Archive) & British Medical Journal Historical Reports',
+    likes: 310,
+    readingTimeMin: 2,
+  },
+  {
+    id: 'fact-7',
+    title: 'Wombatens geometriske gåte: Naturens eneste firkantede avføring',
+    category: 'Natur & Dypet',
+    rarityScore: 88,
+    summary: 'Wombaten er det eneste kjente dyret i universet som produserer terningformede ekskrementer, formet av ulik elastisitet i tarmveggen.',
+    fullStory: 'En australsk wombat deponerer opptil 100 terninger hver natt på toppen av steiner og falne trestammer for å markere territorium. Fordi dyret har dårlig syn, fungerer luktmarkeringen som kommunikasjon. Terningformen hindrer at markeringen ruller ned fra steiner i det kuperte terrenget. Fysikere og biologer avdekket mekanismen ved hjelp av hydrodynamiske modeller: Wombatens siste to meter av tarmen har to distinkte stive riller og to fleksible soner, som under peristaltiske sammentrekninger klemmer massen til perfekte hjørner.',
+    obscureDetails: [
+      'Oppdagelsen vant den prestisjetunge Ig Nobel-prisen i fysikk i 2019.',
+      'Ingeniører studerer nå wombatens tarm for å utvikle nye metoder for forming av leire og polymerer uten skjæreverktøy.',
+      'En gjennomsnittlig terning måler ca. 2 x 2 centimeter og har forbløffende skarpe 90-graders vinkler.'
+    ],
+    tag: 'Biomekanikk',
+    source: 'Soft Matter Journal & Georgia Institute of Technology Physics Laboratory',
+    likes: 472,
+    readingTimeMin: 2,
+  },
+  {
+    id: 'fact-8',
+    title: 'Keiser Caligulas krig mot havguden Neptun',
+    category: 'Historie',
+    rarityScore: 90,
+    summary: 'I år 40 e.Kr. stilte den romerske keiseren opp legionene sine på kysten av Gallia, beordret katapultene til å skyte i bølgene, og lot soldatene plyndre skjell som krigsbytte.',
+    fullStory: 'Den romerske historikeren Suetonius beretter om en av antikkens mest surrealistiske felttog. Caligula marsjerte med en enorm hær mot Den engelske kanal for å invadere Britannia. I stedet for å krysse kanalen, beordret han soldatene i full formasjon, ga ordre om trompetsignal til angrep, og lot legionærene hogge løs på bølgene med sverdene sine. Deretter ble legionærene beordret til å fylle hjelmene med skjell og konkylier, som han triumferende erklærte som "krigsbytte erobret fra selve havet".',
+    obscureDetails: [
+      'Skjellene ble sendt til Roma i forseglede kister for å stilles ut i det keiserlige skattkammeret.',
+      'Caligula reiste et høyt fyrtårn ved Boulogne som et permanent minnesmerke over "seieren over havet".',
+      'Noen moderne historikere mener ordren kan ha vært en bevisst sadistisk ydmykelse av legionærene etter at de nektet å gå om bord i skipene.'
+    ],
+    tag: 'Keiserlige Eksentrisiteter',
+    source: 'Suetonius: De Vita Caesarum (Caligula) & Dio Cassius Roman History',
+    likes: 260,
+    readingTimeMin: 3,
+  },
+  {
+    id: 'fact-9',
+    title: 'Oppdagelsen av sakkarin: Den uvaskede kjemikerens lunsj',
+    category: 'Vitenskap',
+    rarityScore: 87,
+    summary: 'Verdens første kunstige søtningsmiddel ble oppdaget i 1878 fordi en forsker glemte å vaske hendene etter å ha arbeidet med kulltjære.',
+    fullStory: 'Den russiske kjemikeren Constantin Fahlberg jobbet sent i laboratoriet til professor Ira Remsen ved Johns Hopkins University med kulltjæreferbindelser. Sulten og distré glemte han å vaske hendene før han dro hjem for å spise kveldsmat. Da han bet i en brødskive, la han merke til at den smakte overveldende søtt. Han smakte på tommelen sin og oppdaget at den smakte enda søtere. Han løp umiddelbart tilbake til laboratoriet og smakte systematisk på innholdet i alle begerglassene han hadde rørt den kvelden inntil han fant kilden: benzosulfimid.',
+    obscureDetails: [
+      'Fahlberg patenterte stoffet alene under navnet sakkarin og ble styrtrik, noe som førte til en livslang feide med sin mentor Remsen.',
+      'Sakkarin er omtrent 300 til 400 ganger søtere enn vanlig rørsukker og gir null kalorier.',
+      'Remsen uttalte senere bittert: "Fahlberg er en skurk. Han kom til mitt laboratorium som en ukjent og gikk derfra med mitt rykte og mine penger."'
+    ],
+    tag: 'Serendipitet',
+    source: 'Journal of the American Chemical Society (1879) & Chemical Heritage Foundation',
+    likes: 312,
+    readingTimeMin: 2,
+  },
+  {
+    id: 'fact-10',
+    title: 'Tyrisk purpur: Fargen som kostet 10 000 snegler per gram',
+    category: 'Kunst & Kultur',
+    rarityScore: 95,
+    summary: 'Antikkens mest prestisjefylte keiserfarge ble utvunnet fra råtnende sjøsnegler og var verdt mer enn sin egen vekt i rent gull.',
+    fullStory: 'Fønikerne i byene Tyr og Sidon oppdaget at kjertelsekretet fra purpursneglen Bolinus brandaris oksiderer i sollys fra gult til en uimotståelig, dyp lilla-rød nyanse som aldri falmet i vask, men tvert imot ble klarere i solen. Men prosessen var ekstremt arbeidskrevende: Hver snegl ga bare en enkelt dråpe sekret. For å farge kanten på en enkelt romersk toga krevdes det titusenvis av snegler som ble knust og kokt i saltlake i dager under en uutholdelig stank som gjorde at fargerier ble forvist langt utenfor bymurene.',
+    obscureDetails: [
+      'I det romerske keiserriket var det under keiser Nero straffbart med døden for andre enn keiseren å bære klær av ren tyrisk purpur.',
+      'Purpurfargen ble omtalt som "blodig purpur" og var den dyreste luksusvaren i Middelhavsområdet.',
+      'Hemmeligheten bak den nøyaktige kjemiske prosessen gikk tapt da Konstantinopel falt i 1453 og ble først gjenoppdaget på slutten av 1800-tallet.'
+    ],
+    tag: 'Keiserlig Luksus',
+    source: 'Plinius den eldre: Naturalis Historia & Archäologisches Institut Rom',
+    likes: 388,
+    readingTimeMin: 3,
+  },
+];
