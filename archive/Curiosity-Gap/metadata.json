@@ -1,0 +1,6 @@
+{
+  "name": "Terra Incognita - KunnskapsLab",
+  "description": "En innovativ og leken app som utforsker menneskehetens kunnskapshull, kognitive blindsoner, mekanistiske illusjoner og motintuitive paradokser.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
