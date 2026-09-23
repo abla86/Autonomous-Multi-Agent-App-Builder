@@ -1,15 +1,15 @@
 # SWARMFORGE: Autonomous Multi-Agent Software Engineering Swarm
 
-> **A production-ready, full-stack autonomous application builder powered by a coordinated 20-agent engineering swarm, real-time container performance telemetry, automated test assertion suites, and OWASP security auditing.**
+> **A full-stack autonomous application-builder prototype powered by a coordinated 20-agent engineering swarm, runtime performance telemetry, automated regression tests, and bounded OWASP-oriented security analysis.**
 
 ---
 
-## 🌟 Overview & Capabilities
+## Overview & Capabilities
 
 SwarmForge orchestrates 20 specialized autonomous software engineering agents across a disciplined lifecycle:
 **Scan → Diagnose → Parallel Work → Integrate → Real Testing → Production Certification**.
 
-Strictly designed with **Zero Mockups / Zero Fake Success**:
+The repository is designed to exercise real local application behavior rather than mock-only screens. Claims below describe the current implementation and test boundaries:
 - Real Express backend with persistent atomic file-system storage (`data/db.json` with temporary-write-and-rename guarantees).
 - Real-time container performance telemetry tracking actual CPU percent via `process.cpuUsage()`, RSS memory, V8 heap allocations, and host system RAM.
 - Real regression test suite verifying actual runtime schema invariants, REST endpoints, and end-to-end user journeys without test bypasses.
