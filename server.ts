@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import os from 'os';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
@@ -9,7 +10,18 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
+const HOST = process.env.HOST || "127.0.0.1";
+const isProduction = process.env.NODE_ENV === "production";
+const remoteExposure = !["127.0.0.1", "localhost", "::1"].includes(HOST);
+const API_KEY = process.env.APP_API_KEY?.trim() || "";
+
+function timingSafeApiKeyMatch(supplied: string): boolean {
+  if (!API_KEY || !supplied) return false;
+  const a = Buffer.from(supplied);
+  const b = Buffer.from(API_KEY);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 app.disable('x-powered-by');
 app.use((req, res, next) => {
@@ -21,6 +33,19 @@ app.use((req, res, next) => {
 });
 app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ extended: false, limit: '64kb' }));
+
+if (isProduction && remoteExposure && API_KEY.length < 32) {
+  throw new Error('Remote production exposure requires APP_API_KEY with at least 32 characters.');
+}
+
+app.use('/api', (req, res, next) => {
+  if (req.path === '/health') return next();
+  if (!isProduction || !remoteExposure) return next();
+  const supplied = typeof req.headers['x-api-key'] === 'string' ? req.headers['x-api-key'] : '';
+  if (!timingSafeApiKeyMatch(supplied)) return res.status(401).json({ success: false, error: 'API authentication required.' });
+  return next();
+});
+
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
@@ -1562,8 +1587,8 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[MASTER ORCHESTRATOR] Server running on http://0.0.0.0:${PORT}`);
+  app.listen(PORT, HOST, () => {
+    console.log(`[MASTER ORCHESTRATOR] Server running on http://${HOST}:${PORT}`);
   });
 }
 
