@@ -31,5 +31,11 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Typecheck
         run: bun run lint
+      - name: Security boundary assertions
+        run: |
+          grep -q 'APP_API_KEY' server.ts
+          grep -q 'timingSafeEqual' server.ts
+          grep -q 'Remote production exposure requires APP_API_KEY' server.ts
+          grep -q "app.listen(PORT, HOST" server.ts
       - name: Build
         run: bun run build

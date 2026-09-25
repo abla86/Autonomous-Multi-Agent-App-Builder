@@ -6,8 +6,10 @@ This repository contains an active multi-agent application builder. Security con
 ## Controls
 - Security response headers are applied by the server.
 - Express JSON request bodies are bounded to 256 KB.
+- Production binds to loopback by default; remote production exposure requires `HOST` to be explicitly set and a 32+ character `APP_API_KEY`.
 - The server disables the Express fingerprinting header.
 - Secrets must be supplied through environment configuration and never committed.
+- Remote production API access uses a constant-time `X-API-Key` check and keeps `/api/health` as the only unauthenticated API route.
 - CI uses read-only repository permissions.
 - Dependency and GitHub Actions updates are monitored through Dependabot.
 - CodeQL scans JavaScript/TypeScript code.
