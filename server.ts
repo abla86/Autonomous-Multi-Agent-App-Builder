@@ -38,8 +38,35 @@ if (isProduction && remoteExposure && API_KEY.length < 32) {
   throw new Error('Remote production exposure requires APP_API_KEY with at least 32 characters.');
 }
 
+const apiRateBuckets = new Map<string, { count: number; resetAt: number }>();
+const API_RATE_WINDOW_MS = 60_000;
+const API_RATE_LIMIT = 120;
+const MAX_API_RATE_BUCKETS = 10_000;
+
+function apiRateLimited(req: Request): boolean {
+  const key = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+
+  for (const [bucketKey, bucket] of apiRateBuckets) {
+    if (bucket.resetAt <= now) apiRateBuckets.delete(bucketKey);
+  }
+  if (apiRateBuckets.size >= MAX_API_RATE_BUCKETS && !apiRateBuckets.has(key)) return true;
+
+  const current = apiRateBuckets.get(key);
+  if (!current || current.resetAt <= now) {
+    apiRateBuckets.set(key, { count: 1, resetAt: now + API_RATE_WINDOW_MS });
+    return false;
+  }
+  current.count += 1;
+  return current.count > API_RATE_LIMIT;
+}
+
 app.use('/api', (req, res, next) => {
   if (req.path === '/health') return next();
+  if (apiRateLimited(req)) {
+    res.setHeader('Retry-After', '60');
+    return res.status(429).json({ success: false, error: 'Too many requests.' });
+  }
   if (!isProduction || !remoteExposure) return next();
   const supplied = typeof req.headers['x-api-key'] === 'string' ? req.headers['x-api-key'] : '';
   if (!timingSafeApiKeyMatch(supplied)) return res.status(401).json({ success: false, error: 'API authentication required.' });
@@ -1564,7 +1591,7 @@ app.use((err: any, req: Request, res: Response, next: any) => {
   console.error('Unhandled server error:', err);
   res.status(500).json({
     success: false,
-    error: err.message || 'Internal server error',
+    error: 'Internal server error',
     timestamp: new Date().toISOString(),
   });
 });
