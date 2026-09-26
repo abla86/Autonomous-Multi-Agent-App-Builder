@@ -20,16 +20,22 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.2.21"
+          bun-version: "1.4.2"
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Typecheck
         run: bun run lint
+      - name: Security boundary assertions
+        run: |
+          grep -q 'APP_API_KEY' server.ts
+          grep -q 'timingSafeEqual' server.ts
+          grep -q 'Remote production exposure requires APP_API_KEY' server.ts
+          grep -q "app.listen(PORT, HOST" server.ts
       - name: Build
         run: bun run build
