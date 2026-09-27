@@ -15,6 +15,21 @@ const HOST = process.env.HOST || "127.0.0.1";
 const isProduction = process.env.NODE_ENV === "production";
 const remoteExposure = !["127.0.0.1", "localhost", "::1"].includes(HOST);
 const API_KEY = process.env.APP_API_KEY?.trim() || "";
+const MAX_TEXT_LENGTH = 100_000;
+const MAX_NAME_LENGTH = 200;
+const MAX_DESCRIPTION_LENGTH = 10_000;
+const MAX_FILE_PATH_LENGTH = 500;
+const MAX_FILE_NAME_LENGTH = 255;
+
+function boundedString(value: unknown, max: number): string | null {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim();
+  return normalized.length > 0 && normalized.length <= max ? normalized : null;
+}
+
+function newId(prefix: string): string {
+  return `${prefix}-${crypto.randomUUID()}`;
+}
 
 function timingSafeApiKeyMatch(supplied: string): boolean {
   if (!API_KEY || !supplied) return false;
@@ -29,6 +44,10 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Cache-Control', 'no-store');
+  if (isProduction) {
+    res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self';");
+  }
   next();
 });
 app.use(express.json({ limit: '256kb' }));
@@ -601,7 +620,7 @@ app.post('/api/system/performance/reset', (req: Request, res: Response) => {
   const mem = process.memoryUsage();
   swarmTelemetry.peakMemoryMb = Math.round((mem.rss / 1024 / 1024) * 100) / 100;
   sessionEvents.push({
-    id: 'evt-' + Date.now(),
+    id: newId('evt'),
     timestamp: new Date().toISOString(),
     type: 'peak_reset',
     label: 'Peak Memory Watermark Reset',
@@ -621,7 +640,7 @@ app.post('/api/system/gc', (req: Request, res: Response) => {
   const freedHeapMb = Math.round(((beforeMem.heapUsed - afterMem.heapUsed) / 1024 / 1024) * 100) / 100;
 
   sessionEvents.push({
-    id: 'evt-' + Date.now(),
+    id: newId('evt'),
     timestamp: new Date().toISOString(),
     type: 'gc_flush',
     label: 'V8 Memory Flush / GC',
@@ -677,16 +696,16 @@ app.get('/api/projects/:id', (req: Request, res: Response) => {
 
 // Create New Project
 app.post('/api/projects', (req: Request, res: Response) => {
-  const { name, description } = req.body;
-  if (!name || typeof name !== 'string' || name.trim().length === 0) {
-    return res.status(400).json({ success: false, error: 'Project name is required' });
-  }
+  const name = boundedString(req.body?.name, MAX_NAME_LENGTH);
+  const description = req.body?.description === undefined ? 'New autonomous application scaffold' : boundedString(req.body.description, MAX_DESCRIPTION_LENGTH);
+  if (!name) return res.status(400).json({ success: false, error: 'Project name is required and must be <= 200 characters' });
+  if (description === null) return res.status(400).json({ success: false, error: 'Project description is invalid or too long' });
 
   const db = readDB();
   const newProject = {
-    id: 'proj-' + Date.now(),
-    name: name.trim(),
-    description: (description || 'New autonomous application scaffold').trim(),
+    id: newId('proj'),
+    name,
+    description: description || 'New autonomous application scaffold',
     version: '1.0.0',
     status: 'draft',
     healthScore: 85,
@@ -700,15 +719,15 @@ app.post('/api/projects', (req: Request, res: Response) => {
     },
     files: [
       {
-        id: 'file-' + Date.now() + '-1',
+        id: newId('file'),
         name: 'App.tsx',
         path: '/src/App.tsx',
         language: 'typescript',
         updatedAt: new Date().toISOString(),
-        content: `export default function App() {\n  return (\n    <main className="p-6 max-w-4xl mx-auto">\n      <h1 className="text-2xl font-bold text-slate-900">${name.trim()}</h1>\n      <p className="text-slate-600 mt-2">Built autonomously with the 20-agent swarm.</p>\n    </main>\n  );\n}`,
+        content: `export default function App() {\n  return (\n    <main className="p-6 max-w-4xl mx-auto">\n      <h1 className="text-2xl font-bold text-slate-900">${name}</h1>\n      <p className="text-slate-600 mt-2">Built autonomously with the 20-agent swarm.</p>\n    </main>\n  );\n}`,
       },
       {
-        id: 'file-' + Date.now() + '-2',
+        id: newId('file'),
         name: 'server.ts',
         path: '/server.ts',
         language: 'typescript',
@@ -733,14 +752,19 @@ app.put('/api/projects/:id', (req: Request, res: Response) => {
   }
 
   const existing = db.projects[index];
-  const { name, description, status, healthScore } = req.body;
+  const name = req.body?.name === undefined ? existing.name : boundedString(req.body.name, MAX_NAME_LENGTH);
+  const description = req.body?.description === undefined ? existing.description : boundedString(req.body.description, MAX_DESCRIPTION_LENGTH);
+  const status = req.body?.status === undefined ? existing.status : boundedString(req.body.status, 50);
+  const healthScore = req.body?.healthScore === undefined ? existing.healthScore : req.body.healthScore;
+  if (!name || !description || !status) return res.status(400).json({ success: false, error: 'Invalid project fields' });
+  if (typeof healthScore !== 'number' || !Number.isFinite(healthScore) || healthScore < 0 || healthScore > 100) return res.status(400).json({ success: false, error: 'healthScore must be between 0 and 100' });
 
   const updated = {
     ...existing,
-    name: name !== undefined ? String(name).trim() : existing.name,
-    description: description !== undefined ? String(description).trim() : existing.description,
-    status: status || existing.status,
-    healthScore: typeof healthScore === 'number' ? healthScore : existing.healthScore,
+    name,
+    description,
+    status,
+    healthScore,
     updatedAt: new Date().toISOString(),
   };
 
@@ -766,10 +790,12 @@ app.delete('/api/projects/:id', (req: Request, res: Response) => {
 
 // Add / Update File in Project
 app.post('/api/projects/:id/files', (req: Request, res: Response) => {
-  const { name, path: filePath, content, language } = req.body;
-  if (!name || !content || !filePath) {
-    return res.status(400).json({ success: false, error: 'Name, path, and content are required' });
-  }
+  const name = boundedString(req.body?.name, MAX_FILE_NAME_LENGTH);
+  const filePath = boundedString(req.body?.path, MAX_FILE_PATH_LENGTH);
+  const content = boundedString(req.body?.content, MAX_TEXT_LENGTH);
+  const language = req.body?.language === undefined ? 'typescript' : boundedString(req.body.language, 50);
+  if (!name || !filePath || content === null || !language) return res.status(400).json({ success: false, error: 'Invalid file payload' });
+  if (!filePath.startsWith('/') || filePath.includes('\\') || filePath.split('/').includes('..')) return res.status(400).json({ success: false, error: 'Invalid file path' });
 
   const db = readDB();
   const project = db.projects.find((p) => p.id === req.params.id);
@@ -789,7 +815,7 @@ app.post('/api/projects/:id/files', (req: Request, res: Response) => {
     };
   } else {
     project.files.push({
-      id: 'file-' + Date.now(),
+      id: newId('file'),
       name,
       path: filePath,
       content,
@@ -835,7 +861,7 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
   swarmTelemetry.isSwarmActive = true;
   swarmTelemetry.activeWorkers = 20;
   sessionEvents.push({
-    id: 'evt-' + Date.now(),
+    id: newId('evt'),
     timestamp: new Date().toISOString(),
     type: 'swarm_start',
     label: `Swarm Orchestration Triggered: ${project.name}`,
