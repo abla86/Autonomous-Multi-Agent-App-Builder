@@ -21,7 +21,7 @@ services:
       - -ec
       - |
         npm install -g bun --silent
-        bun install --frozen-lockfile
+        bun install
         exec ./node_modules/.bin/tsx server.ts
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
