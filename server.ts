@@ -20,6 +20,9 @@ const MAX_NAME_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10_000;
 const MAX_FILE_PATH_LENGTH = 500;
 const MAX_FILE_NAME_LENGTH = 255;
+const MAX_PROJECTS = 100;
+const MAX_FILES_PER_PROJECT = 1_000;
+const MAX_ROUTE_ID_LENGTH = 100;
 
 function boundedString(value: unknown, max: number): string | null {
   if (typeof value !== 'string') return null;
@@ -29,6 +32,11 @@ function boundedString(value: unknown, max: number): string | null {
 
 function newId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}`;
+}
+
+function boundedId(value: unknown): string | null {
+  if (typeof value !== 'string' || value.length === 0 || value.length > MAX_ROUTE_ID_LENGTH) return null;
+  return /^[A-Za-z0-9._:-]+$/.test(value) ? value : null;
 }
 
 function timingSafeApiKeyMatch(supplied: string): boolean {
@@ -319,12 +327,14 @@ function readDB(): DBStructure {
 }
 
 function writeDB(data: DBStructure): void {
+  const tempFile = `${DB_FILE}.tmp`;
   try {
-    const tempFile = `${DB_FILE}.tmp`;
     fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf-8');
     fs.renameSync(tempFile, DB_FILE);
   } catch (err) {
+    try { if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile); } catch {}
     console.error('Failed to write database atomically:', err);
+    throw new Error('Database persistence failed');
   }
 }
 
@@ -686,8 +696,10 @@ app.get('/api/projects', (req: Request, res: Response) => {
 
 // Get Project Details
 app.get('/api/projects/:id', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -702,6 +714,9 @@ app.post('/api/projects', (req: Request, res: Response) => {
   if (description === null) return res.status(400).json({ success: false, error: 'Project description is invalid or too long' });
 
   const db = readDB();
+  if (db.projects.length >= MAX_PROJECTS) {
+    return res.status(409).json({ success: false, error: `Project limit reached (${MAX_PROJECTS}).` });
+  }
   const newProject = {
     id: newId('proj'),
     name,
@@ -745,8 +760,10 @@ app.post('/api/projects', (req: Request, res: Response) => {
 
 // Update Project
 app.put('/api/projects/:id', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const index = db.projects.findIndex((p) => p.id === req.params.id);
+  const index = db.projects.findIndex((p) => p.id === projectId);
   if (index === -1) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -776,6 +793,8 @@ app.put('/api/projects/:id', (req: Request, res: Response) => {
 
 // Delete Project
 app.delete('/api/projects/:id', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const initialLength = db.projects.length;
   db.projects = db.projects.filter((p) => p.id !== req.params.id);
@@ -790,6 +809,8 @@ app.delete('/api/projects/:id', (req: Request, res: Response) => {
 
 // Add / Update File in Project
 app.post('/api/projects/:id/files', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const name = boundedString(req.body?.name, MAX_FILE_NAME_LENGTH);
   const filePath = boundedString(req.body?.path, MAX_FILE_PATH_LENGTH);
   const content = boundedString(req.body?.content, MAX_TEXT_LENGTH);
@@ -798,12 +819,15 @@ app.post('/api/projects/:id/files', (req: Request, res: Response) => {
   if (!filePath.startsWith('/') || filePath.includes('\\') || filePath.split('/').includes('..')) return res.status(400).json({ success: false, error: 'Invalid file path' });
 
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
 
   const existingFileIndex = project.files.findIndex((f: any) => f.path === filePath || f.id === req.body.id);
+  if (existingFileIndex === -1 && project.files.length >= MAX_FILES_PER_PROJECT) {
+    return res.status(409).json({ success: false, error: `File limit reached (${MAX_FILES_PER_PROJECT}).` });
+  }
   if (existingFileIndex >= 0) {
     project.files[existingFileIndex] = {
       ...project.files[existingFileIndex],
@@ -836,13 +860,20 @@ app.post('/api/projects/:id/files', (req: Request, res: Response) => {
 
 // Delete File from Project
 app.delete('/api/projects/:id/files/:fileId', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  const fileId = boundedId(req.params.fileId);
+  if (!projectId || !fileId) return res.status(400).json({ success: false, error: 'Invalid project or file id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
 
-  project.files = project.files.filter((f: any) => f.id !== req.params.fileId);
+  const initialFileCount = project.files.length;
+  project.files = project.files.filter((f: any) => f.id !== fileId);
+  if (project.files.length === initialFileCount) {
+    return res.status(404).json({ success: false, error: 'File not found' });
+  }
   project.stats.filesCount = project.files.length;
   project.updatedAt = new Date().toISOString();
 
@@ -853,7 +884,7 @@ app.delete('/api/projects/:id/files/:fileId', (req: Request, res: Response) => {
 // Run Autonomous Swarm on Project
 app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1223,7 +1254,7 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
 // Log out Swarm Health Audit Report to system & project store
 app.post('/api/projects/:id/swarm/report-log', (req: Request, res: Response) => {
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1280,7 +1311,7 @@ app.post('/api/projects/:id/swarm/report-log', (req: Request, res: Response) => 
 // Run Real Tests on Project
 app.post('/api/projects/:id/tests/run', (req: Request, res: Response) => {
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1406,7 +1437,7 @@ app.post('/api/projects/:id/tests/run', (req: Request, res: Response) => {
 // Run Real Security Scan on Project Codebase
 app.post('/api/projects/:id/security-scan', (req: Request, res: Response) => {
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1485,13 +1516,15 @@ app.post('/api/projects/:id/security-scan', (req: Request, res: Response) => {
 
 // AI Agent Gemini 3.8 Flash Assistant
 app.post('/api/projects/:id/ai/consult', async (req: Request, res: Response) => {
-  const { prompt, contextFileId } = req.body;
-  if (!prompt || typeof prompt !== 'string') {
+  const projectId = boundedId(req.params.id);
+  const prompt = boundedString(req.body?.prompt, 20_000);
+  const contextFileId = req.body?.contextFileId === undefined ? undefined : boundedId(req.body.contextFileId);
+  if (!projectId || !prompt) {
     return res.status(400).json({ success: false, error: 'Prompt is required' });
   }
 
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1564,7 +1597,7 @@ Return ONLY valid JSON.`;
 // Final QA Deployment Gate Check (Agent 20)
 app.get('/api/projects/:id/deploy-check', (req: Request, res: Response) => {
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1602,7 +1635,7 @@ app.get('/api/projects/:id/deploy-check', (req: Request, res: Response) => {
 // Project Export
 app.get('/api/projects/:id/export', (req: Request, res: Response) => {
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
