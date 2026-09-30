@@ -23,19 +23,28 @@ import {
   GlobalErrorEvent,
 } from '../types';
 
+async function safeJson(res: Response, endpoint: string): Promise<any> {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const text = await res.text();
+    throw new Error(`Endpoint ${endpoint} returned non-JSON response (${res.status}): ${text.substring(0, 100)}`);
+  }
+  return res.json();
+}
 
 export const api = {
   async getHealth(): Promise<any> {
     const res = await fetch('/api/health');
     if (!res.ok) throw new Error(`Health check failed: ${res.statusText}`);
-    return res.json();
+    return safeJson(res, '/api/health');
   },
 
   async getPerformanceMetrics(): Promise<SystemPerformanceMetrics> {
     const res = await fetch('/api/system/performance');
     if (!res.ok) throw new Error(`Performance metrics failed: ${res.statusText}`);
-    return res.json();
+    return safeJson(res, '/api/system/performance');
   },
+
 
   async resetPerformanceTelemetry(): Promise<any> {
     const res = await fetch('/api/system/performance/reset', { method: 'POST' });
