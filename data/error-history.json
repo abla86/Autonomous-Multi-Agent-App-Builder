@@ -1,0 +1,51 @@
+[
+  {
+    "id": "err-1790771939808-2w4b",
+    "traceId": "tr-1790771939797-ag2i",
+    "timestamp": "2026-09-30T12:38:59.808Z",
+    "source": "backend",
+    "type": "operational_error",
+    "message": "Critical Database Transaction Lock Timeout in Swarm Orchestrator",
+    "name": "AppError",
+    "stack": "AppError: Critical Database Transaction Lock Timeout in Swarm Orchestrator\n    at <anonymous> (/app/applet/server.ts:761:7)\n    at Layer.handle [as handle_request] (/app/applet/node_modules/express/lib/router/layer.js:95:5)\n    at next (/app/applet/node_modules/express/lib/router/route.js:149:13)\n    at Route.dispatch (/app/applet/node_modules/express/lib/router/route.js:119:3)\n    at Layer.handle [as handle_request] (/app/applet/node_modules/express/lib/router/layer.js:95:5)\n    at /app/applet/node_modules/express/lib/router/index.js:284:15\n    at Function.process_params (/app/applet/node_modules/express/lib/router/index.js:346:12)\n    at next (/app/applet/node_modules/express/lib/router/index.js:280:10)\n    at <anonymous> (/app/applet/server.ts:353:3)\n    at Layer.handle [as handle_request] (/app/applet/node_modules/express/lib/router/layer.js:95:5)",
+    "endpoint": "POST /api/system/simulate-error",
+    "statusCode": 500,
+    "userFriendlyMessage": "A database query took longer than expected and was safely cancelled.",
+    "suggestedRemedy": "Retry the operation. If the issue persists, verify database health in Observability tab.",
+    "fallbackActivated": false,
+    "resolved": false
+  },
+  {
+    "id": "err-seed-01",
+    "traceId": "tr-err-8109",
+    "timestamp": "2026-09-30T12:03:52.542Z",
+    "source": "backend",
+    "type": "operational_error",
+    "statusCode": 422,
+    "endpoint": "/api/projects/proj-swarm-core/rollback/simulate-merge",
+    "name": "AssertionError",
+    "message": "Critical test assertion failed: Priority P0 violated in orchestrator.ts",
+    "userFriendlyMessage": "The automated test guard prevented broken code from being merged into main branch.",
+    "suggestedRemedy": "Review the failing test assertions in Test Studio or inspect the snapshot diff.",
+    "fallbackActivated": true,
+    "fallbackDescription": "Automated rollback triggered: Clean baseline snapshot restored automatically.",
+    "resolved": true,
+    "resolvedAt": "2026-09-30T12:04:52.542Z"
+  },
+  {
+    "id": "err-seed-02",
+    "traceId": "tr-err-2401",
+    "timestamp": "2026-09-30T12:23:52.542Z",
+    "source": "backend",
+    "type": "api_error",
+    "statusCode": 404,
+    "endpoint": "/api/projects/non-existent-proj/files",
+    "name": "NotFoundError",
+    "message": "Project non-existent-proj was not found in persistent store.",
+    "userFriendlyMessage": "The requested project could not be located in the system registry.",
+    "suggestedRemedy": "Verify the project ID or select an active project from the dropdown.",
+    "fallbackActivated": true,
+    "fallbackDescription": "Defaulted to current active project: SwarmForge Autonomous Engine.",
+    "resolved": false
+  }
+]

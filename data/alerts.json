@@ -1,0 +1,87 @@
+{
+  "rules": [
+    {
+      "id": "rule-error-rate",
+      "name": "Critical Error Rate Spike",
+      "metric": "error_rate",
+      "condition": "gt",
+      "threshold": 5,
+      "unit": "%",
+      "severity": "critical",
+      "enabled": true,
+      "description": "Triggers when 5xx/4xx error rate exceeds 5.0% over rolling window."
+    },
+    {
+      "id": "rule-latency-p95",
+      "name": "P95 Latency Degradation",
+      "metric": "response_time_p95",
+      "condition": "gt",
+      "threshold": 350,
+      "unit": "ms",
+      "severity": "warning",
+      "enabled": true,
+      "description": "Triggers when 95th percentile request latency exceeds 350ms."
+    },
+    {
+      "id": "rule-memory-usage",
+      "name": "Heap Memory Allocation Surge",
+      "metric": "memory_usage",
+      "condition": "gt",
+      "threshold": 400,
+      "unit": "MB",
+      "severity": "warning",
+      "enabled": true,
+      "description": "Triggers when Node.js heap allocation exceeds 400MB."
+    },
+    {
+      "id": "rule-subsystem-down",
+      "name": "Subsystem Health Failure",
+      "metric": "subsystem_down",
+      "condition": "eq",
+      "threshold": 1,
+      "unit": "fault",
+      "severity": "critical",
+      "enabled": true,
+      "description": "Triggers when any core persistence or swarm subsystem reports unhealthy status."
+    }
+  ],
+  "activeAlerts": [
+    {
+      "id": "alert-sim-1790771949189",
+      "ruleId": "rule-latency-p95",
+      "title": "Simulated P95 Latency Degradation",
+      "message": "Simulated 485ms latency spike injected on endpoint /api/swarm/run.",
+      "severity": "warning",
+      "metricValue": 485,
+      "threshold": 350,
+      "unit": "ms",
+      "triggeredAt": "2026-09-30T12:39:09.189Z",
+      "status": "active"
+    },
+    {
+      "id": "alert-1790771949187-be3q",
+      "ruleId": "rule-latency-p95",
+      "title": "Elevated P95 Latency (482ms > 350ms)",
+      "message": "95th percentile response time degraded to 482ms.",
+      "severity": "warning",
+      "metricValue": 482,
+      "threshold": 350,
+      "unit": "ms",
+      "triggeredAt": "2026-09-30T12:39:09.187Z",
+      "status": "active"
+    },
+    {
+      "id": "alt-baseline-01",
+      "ruleId": "rule-latency-p95",
+      "title": "AST Dependency Scan Latency",
+      "message": "Dependency tree analyzer experienced a transient 380ms processing spike.",
+      "severity": "warning",
+      "metricValue": 380,
+      "threshold": 350,
+      "unit": "ms",
+      "triggeredAt": "2026-09-30T12:20:52.542Z",
+      "status": "resolved",
+      "resolvedAt": "2026-09-30T12:26:52.542Z"
+    }
+  ]
+}

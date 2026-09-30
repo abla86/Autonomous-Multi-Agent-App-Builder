@@ -1,6 +1,7 @@
 import React from 'react';
-import { Bot, Cpu, Play, Plus, RefreshCw, ShieldCheck, Activity, Terminal } from 'lucide-react';
+import { Bot, Cpu, Play, Plus, RefreshCw, ShieldCheck, Activity, Terminal, Flame, RotateCcw, Sliders, Gauge } from 'lucide-react';
 import { Project, SystemStatus } from '../types';
+
 
 interface NavbarProps {
   projects: Project[];
@@ -113,12 +114,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <nav className="flex space-x-1 border-t border-slate-800/80 pt-1">
+        <nav className="flex space-x-1 border-t border-slate-800/80 pt-1 overflow-x-auto">
           {[
             { id: 'swarm', label: '20-Agent Swarm', icon: Bot },
-            { id: 'code', label: 'Code & Architecture', icon: Terminal },
-            { id: 'tests', label: 'Test Studio (Unit / E2E)', icon: Activity },
-            { id: 'security', label: 'Security & Vulnerabilities', icon: ShieldCheck },
+            { id: 'observability', label: 'Observability & Logs', icon: Activity, badge: 'LIVE' },
+            { id: 'rollback', label: 'Rollback & Snapshots', icon: RotateCcw },
+            { id: 'flags', label: 'Feature Flags', icon: Sliders },
+            { id: 'heatmap', label: 'Agent Heatmap', icon: Flame },
+            { id: 'code', label: 'Code Doctor & Editor', icon: Terminal },
+            { id: 'tests', label: 'Test Studio', icon: Gauge },
+            { id: 'security', label: 'Security Center', icon: ShieldCheck },
             { id: 'ai', label: 'Agent 19 (Gemini AI)', icon: Cpu },
             { id: 'deploy', label: 'Agent 20 (Final QA & Deploy)', icon: ShieldCheck },
           ].map((tab) => {
@@ -129,7 +134,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 key={tab.id}
                 id={`tab-nav-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2.5 text-xs font-medium border-b-2 transition whitespace-nowrap ${
+                className={`flex items-center space-x-2 px-3.5 py-2.5 text-xs font-medium border-b-2 transition whitespace-nowrap ${
                   isActive
                     ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
@@ -137,10 +142,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
+                {tab.badge && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    {tab.badge}
+                  </span>
+                )}
               </button>
             );
           })}
         </nav>
+
       </div>
     </header>
   );
