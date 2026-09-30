@@ -883,6 +883,8 @@ app.delete('/api/projects/:id/files/:fileId', (req: Request, res: Response) => {
 
 // Run Autonomous Swarm on Project
 app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
@@ -1253,6 +1255,8 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
 
 // Log out Swarm Health Audit Report to system & project store
 app.post('/api/projects/:id/swarm/report-log', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
@@ -1310,6 +1314,8 @@ app.post('/api/projects/:id/swarm/report-log', (req: Request, res: Response) => 
 
 // Run Real Tests on Project
 app.post('/api/projects/:id/tests/run', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
@@ -1436,6 +1442,8 @@ app.post('/api/projects/:id/tests/run', (req: Request, res: Response) => {
 
 // Run Real Security Scan on Project Codebase
 app.post('/api/projects/:id/security-scan', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
@@ -1596,6 +1604,8 @@ Return ONLY valid JSON.`;
 
 // Final QA Deployment Gate Check (Agent 20)
 app.get('/api/projects/:id/deploy-check', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
@@ -1634,6 +1644,8 @@ app.get('/api/projects/:id/deploy-check', (req: Request, res: Response) => {
 
 // Project Export
 app.get('/api/projects/:id/export', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
