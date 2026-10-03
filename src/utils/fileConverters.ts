@@ -1,4 +1,5 @@
 import JSZip from 'jszip';
+import JSZip from 'jszip';
 import { Project, ProjectFile, FileImportResult, ExportFormat } from '../types';
 
 /**
