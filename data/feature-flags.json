@@ -1,0 +1,101 @@
+[
+  {
+    "key": "auto_rollback_on_test_failure",
+    "name": "Automated Rollback Engine",
+    "description": "Automatically reverts agent merges when critical unit, integration, or E2E tests fail.",
+    "category": "reliability",
+    "enabled": true,
+    "rolloutPercentage": 100,
+    "environment": "all",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "SYSTEM_ORCHESTRATOR"
+  },
+  {
+    "key": "standard_agent_protocol",
+    "name": "Swarm Communication Protocol v2.1",
+    "description": "Enforces structured inter-agent messaging (Findings, Action Requests, Shared Artifacts, Conflict Mediation).",
+    "category": "swarm",
+    "enabled": true,
+    "rolloutPercentage": 100,
+    "environment": "all",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "AGENT_1_ANALYST"
+  },
+  {
+    "key": "conflict_arbitration_mediator",
+    "name": "Arbitrator Conflict Resolution Engine",
+    "description": "Designates Agent 1 (Analyst) and Agent 17 (Integrity) as arbiters for contradictory agent changes.",
+    "category": "reliability",
+    "enabled": true,
+    "rolloutPercentage": 100,
+    "environment": "all",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "AGENT_17_INTEGRITY"
+  },
+  {
+    "key": "ast_diagnostics_code_doctor",
+    "name": "AST Code Doctor Diagnostics",
+    "description": "Deep syntax tree linting and automated single-click repair patches with diff preview.",
+    "category": "editor",
+    "enabled": true,
+    "rolloutPercentage": 100,
+    "environment": "all",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "AGENT_18_RECOVERY"
+  },
+  {
+    "key": "live_worker_heatmap",
+    "name": "Agent Activity Heatmap Telemetry",
+    "description": "Real-time visual density matrix of agent operations, repair velocity, and hotspots.",
+    "category": "swarm",
+    "enabled": true,
+    "rolloutPercentage": 100,
+    "environment": "all",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "AGENT_8_PERFORMANCE"
+  },
+  {
+    "key": "strict_qa_deployment_barrier",
+    "name": "Agent 20 Strict QA Production Gate",
+    "description": "Enforces all 16 automated production checks before generating release bundles.",
+    "category": "security",
+    "enabled": true,
+    "rolloutPercentage": 100,
+    "environment": "production",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "AGENT_20_QA"
+  },
+  {
+    "key": "universal_document_pipeline",
+    "name": "Universal Document Importer & Exporter",
+    "description": "Deep parsing and exporting for Word (.docx), Excel (.xlsx), PDF, and ZIP bundles.",
+    "category": "editor",
+    "enabled": true,
+    "rolloutPercentage": 100,
+    "environment": "all",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "AGENT_15_DOCS"
+  },
+  {
+    "key": "gemini_cloud_advisor",
+    "name": "Agent 19 Gemini Cloud Intelligence",
+    "description": "Multimodal AI code synthesis, semantic bug explanation, and architectural reviews.",
+    "category": "swarm",
+    "enabled": true,
+    "rolloutPercentage": 100,
+    "environment": "all",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "AGENT_19_AI"
+  },
+  {
+    "key": "parallel_agent_workers",
+    "name": "Concurrent High-Throughput Swarm Pool",
+    "description": "Dispatches non-dependent agents concurrently across multi-core workers.",
+    "category": "experimental",
+    "enabled": false,
+    "rolloutPercentage": 30,
+    "environment": "development",
+    "updatedAt": "2026-09-30T13:11:17.569Z",
+    "updatedBy": "AGENT_13_DEVOPS"
+  }
+]
