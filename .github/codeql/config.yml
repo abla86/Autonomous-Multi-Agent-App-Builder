@@ -1,0 +1,7 @@
+name: "CodeQL security configuration"
+
+paths-ignore:
+  - "archive/**"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/coverage/**"

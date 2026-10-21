@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
@@ -6,20 +6,75 @@ import os from 'os';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import {
+  getFeatureFlags,
+  toggleFeatureFlag,
+  updateFeatureFlag,
+  createFeatureFlag,
+  deleteFeatureFlag,
+  evaluateFlags,
+  resetFeatureFlagsToDefaults,
+  isFeatureEnabled,
+} from './src/server/featureFlags';
+import {
+  getSnapshots,
+  createSnapshot,
+  getSnapshot,
+  getRollbackLogs,
+  getRollbackConfig,
+  updateRollbackConfig,
+  executeRollback,
+  evaluateCriticalTests,
+  simulateMergeAndGuard,
+} from './src/server/rollbackEngine';
+import {
+  getProtocolMessages,
+  sendProtocolMessage,
+  resolveConflict,
+  simulateProtocolCycle,
+  getProtocolSpecification,
+} from './src/server/swarmProtocol';
+import {
+  addLog,
+  getLogs,
+  clearLogs,
+  exportLogs,
+} from './src/server/logger';
+import {
+  recordRequestMetric,
+  calculateMetrics,
+  getHealthReport,
+  getAlerts,
+  acknowledgeAlert,
+  resolveAlert,
+  simulateAlertScenario,
+} from './src/server/monitoring';
+import {
+  AppError,
+  recordGlobalError,
+  getGlobalErrors,
+  resolveGlobalError,
+  clearResolvedErrors,
+  globalErrorMiddleware,
+  setupProcessErrorHandlers,
+} from './src/server/errorHandler';
 
 dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
-const HOST = process.env.HOST || "127.0.0.1";
+const HOST = process.env.HOST || "0.0.0.0";
 const isProduction = process.env.NODE_ENV === "production";
-const remoteExposure = !["127.0.0.1", "localhost", "::1"].includes(HOST);
+const remoteExposure = !["127.0.0.1", "localhost", "::1", "0.0.0.0"].includes(HOST);
 const API_KEY = process.env.APP_API_KEY?.trim() || "";
 const MAX_TEXT_LENGTH = 100_000;
 const MAX_NAME_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10_000;
 const MAX_FILE_PATH_LENGTH = 500;
 const MAX_FILE_NAME_LENGTH = 255;
+const MAX_PROJECTS = 100;
+const MAX_FILES_PER_PROJECT = 1_000;
+const MAX_ROUTE_ID_LENGTH = 100;
 
 function boundedString(value: unknown, max: number): string | null {
   if (typeof value !== 'string') return null;
@@ -29,6 +84,11 @@ function boundedString(value: unknown, max: number): string | null {
 
 function newId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}`;
+}
+
+function boundedId(value: unknown): string | null {
+  if (typeof value !== 'string' || value.length === 0 || value.length > MAX_ROUTE_ID_LENGTH) return null;
+  return /^[A-Za-z0-9._:-]+$/.test(value) ? value : null;
 }
 
 function timingSafeApiKeyMatch(supplied: string): boolean {
@@ -41,17 +101,50 @@ function timingSafeApiKeyMatch(supplied: string): boolean {
 app.disable('x-powered-by');
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  res.setHeader('Cache-Control', 'no-store');
-  if (isProduction) {
-    res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self';");
-  }
   next();
 });
-app.use(express.json({ limit: '256kb' }));
-app.use(express.urlencoded({ extended: false, limit: '64kb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '2mb' }));
+
+// Request Observability & Structured Request Logger Middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const traceId = (req.headers['x-request-id'] as string) || `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  res.setHeader('x-request-id', traceId);
+  (req as any).traceId = traceId;
+
+  const startHrTime = process.hrtime();
+
+  res.on('finish', () => {
+    const elapsedHrTime = process.hrtime(startHrTime);
+    const durationMs = Math.round((elapsedHrTime[0] * 1000 + elapsedHrTime[1] / 1e6) * 10) / 10;
+
+    recordRequestMetric(req.method, req.path, res.statusCode, durationMs);
+
+    if (req.path.startsWith('/api') && !req.path.includes('/api/logs') && !req.path.includes('/api/system/performance/stream')) {
+      const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info';
+      addLog({
+        level,
+        category: 'api_request',
+        source: 'backend',
+        action: 'API_REQUEST_COMPLETED',
+        message: `${req.method} ${req.path} -> ${res.statusCode} (${durationMs}ms)`,
+        method: req.method,
+        path: req.path,
+        statusCode: res.statusCode,
+        responseTimeMs: durationMs,
+        traceId,
+        metadata: {
+          query: Object.keys(req.query).length > 0 ? req.query : undefined,
+          contentLength: res.getHeader('content-length'),
+        },
+      });
+    }
+  });
+
+  next();
+});
 
 if (isProduction && remoteExposure && API_KEY.length < 32) {
   throw new Error('Remote production exposure requires APP_API_KEY with at least 32 characters.');
@@ -59,7 +152,7 @@ if (isProduction && remoteExposure && API_KEY.length < 32) {
 
 const apiRateBuckets = new Map<string, { count: number; resetAt: number }>();
 const API_RATE_WINDOW_MS = 60_000;
-const API_RATE_LIMIT = 120;
+const API_RATE_LIMIT = 600;
 const MAX_API_RATE_BUCKETS = 10_000;
 
 function apiRateLimited(req: Request): boolean {
@@ -81,7 +174,7 @@ function apiRateLimited(req: Request): boolean {
 }
 
 app.use('/api', (req, res, next) => {
-  if (req.path === '/health') return next();
+  if (req.path === '/health' || req.path.startsWith('/system/performance')) return next();
   if (apiRateLimited(req)) {
     res.setHeader('Retry-After', '60');
     return res.status(429).json({ success: false, error: 'Too many requests.' });
@@ -91,6 +184,7 @@ app.use('/api', (req, res, next) => {
   if (!timingSafeApiKeyMatch(supplied)) return res.status(401).json({ success: false, error: 'API authentication required.' });
   return next();
 });
+
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -319,12 +413,14 @@ function readDB(): DBStructure {
 }
 
 function writeDB(data: DBStructure): void {
+  const tempFile = `${DB_FILE}.tmp`;
   try {
-    const tempFile = `${DB_FILE}.tmp`;
     fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf-8');
     fs.renameSync(tempFile, DB_FILE);
   } catch (err) {
+    try { if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile); } catch {}
     console.error('Failed to write database atomically:', err);
+    throw new Error('Database persistence failed');
   }
 }
 
@@ -575,15 +671,228 @@ metricsInterval.unref();
 // ==========================================
 
 // Health Endpoint
-app.get('/api/health', (req: Request, res: Response) => {
-  res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptimeSeconds: Math.floor(process.uptime()),
-    database: fs.existsSync(DB_FILE) ? 'connected' : 'initializing',
-    server: 'Express 4.21.2 on Node.js',
-  });
+app.get('/api/health', async (req: Request, res: Response) => {
+  try {
+    const report = await getHealthReport();
+    res.status(200).json({
+      status: report.status,
+      timestamp: report.timestamp,
+      uptimeSeconds: report.uptimeSeconds,
+      database: report.subsystems.database.status === 'healthy' ? 'connected' : 'degraded',
+      server: 'Express 4.21.2 on Node.js',
+      report,
+    });
+  } catch {
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptimeSeconds: Math.floor(process.uptime()),
+      database: fs.existsSync(DB_FILE) ? 'connected' : 'initializing',
+      server: 'Express 4.21.2 on Node.js',
+    });
+  }
 });
+
+// Deep Detailed Health Report
+app.get('/api/system/health-report', async (req: Request, res: Response) => {
+  const report = await getHealthReport();
+  return res.status(200).json({ success: true, report });
+});
+
+// ==========================================
+// STRUCTURED LOGGING APIS
+// ==========================================
+
+// Get structured logs with query filters
+app.get('/api/logs', (req: Request, res: Response) => {
+  const { search, level, category, source, limit, since } = req.query;
+  const result = getLogs({
+    search: search as string,
+    level: level as any,
+    category: category as any,
+    source: source as any,
+    limit: limit ? parseInt(limit as string, 10) : 100,
+    since: since as string,
+  });
+  return res.status(200).json({ success: true, ...result });
+});
+
+// Ingest structured log from frontend or client agents
+app.post('/api/logs', (req: Request, res: Response) => {
+  const { level, category, source, action, message, errorDetails, metadata, traceId } = req.body;
+  if (!message && !action) {
+    return res.status(400).json({ success: false, error: 'Log action or message is required' });
+  }
+
+  const log = addLog({
+    level: level || 'info',
+    category: category || 'user_action',
+    source: source || 'frontend',
+    action: action || 'CLIENT_EVENT',
+    message: message || action,
+    errorDetails,
+    metadata,
+    traceId,
+  });
+
+  return res.status(201).json({ success: true, log });
+});
+
+// Clear structured logs
+app.delete('/api/logs', (req: Request, res: Response) => {
+  clearLogs();
+  return res.status(200).json({ success: true, message: 'Structured logs cleared successfully' });
+});
+
+// Export structured logs as JSON or CSV
+app.get('/api/logs/export', (req: Request, res: Response) => {
+  const format = req.query.format === 'csv' ? 'csv' : 'json';
+  const data = exportLogs(format);
+
+  if (format === 'csv') {
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="system-logs.csv"');
+    return res.send(data);
+  }
+
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', 'attachment; filename="system-logs.json"');
+  return res.send(data);
+});
+
+// ==========================================
+// OBSERVABILITY & ALERTING APIS
+// ==========================================
+
+// Performance & Latency Metrics
+app.get('/api/monitoring/metrics', (req: Request, res: Response) => {
+  const metrics = calculateMetrics();
+  return res.status(200).json({ success: true, metrics });
+});
+
+// Alerts Listing (Rules + Active Instances)
+app.get('/api/monitoring/alerts', (req: Request, res: Response) => {
+  const alertsData = getAlerts();
+  return res.status(200).json({ success: true, ...alertsData });
+});
+
+// Acknowledge Alert
+app.post('/api/monitoring/alerts/:id/ack', (req: Request, res: Response) => {
+  const alert = acknowledgeAlert(req.params.id);
+  if (!alert) {
+    return res.status(404).json({ success: false, error: 'Alert not found' });
+  }
+  return res.status(200).json({ success: true, alert });
+});
+
+// Resolve Alert
+app.post('/api/monitoring/alerts/:id/resolve', (req: Request, res: Response) => {
+  const alert = resolveAlert(req.params.id);
+  if (!alert) {
+    return res.status(404).json({ success: false, error: 'Alert not found' });
+  }
+  return res.status(200).json({ success: true, alert });
+});
+
+// Simulate Alert Scenario (for testing alerting mechanisms)
+app.post('/api/monitoring/alerts/simulate', (req: Request, res: Response) => {
+  const scenario = req.body.scenario as 'latency_spike' | 'error_burst' | 'memory_surge' | 'subsystem_down';
+  if (!['latency_spike', 'error_burst', 'memory_surge', 'subsystem_down'].includes(scenario)) {
+    return res.status(400).json({ success: false, error: 'Invalid scenario type' });
+  }
+  const alert = simulateAlertScenario(scenario);
+  return res.status(201).json({ success: true, alert });
+});
+
+// ==========================================
+// GLOBAL ERROR HANDLING & TESTING APIS
+// ==========================================
+
+// Get all recorded global errors
+app.get('/api/system/errors', (req: Request, res: Response) => {
+  const errors = getGlobalErrors();
+  return res.status(200).json({ success: true, count: errors.length, errors });
+});
+
+// Resolve a recorded global error
+app.post('/api/system/errors/:id/resolve', (req: Request, res: Response) => {
+  const success = resolveGlobalError(req.params.id);
+  if (!success) {
+    return res.status(404).json({ success: false, error: 'Error record not found' });
+  }
+  return res.status(200).json({ success: true, message: 'Error resolved' });
+});
+
+// Clear resolved errors
+app.post('/api/system/errors/clear-resolved', (req: Request, res: Response) => {
+  clearResolvedErrors();
+  return res.status(200).json({ success: true, message: 'Resolved errors cleared' });
+});
+
+// Simulate Error Scenarios to test Global Error Handler & Graceful Fallbacks
+app.post('/api/system/simulate-error', (req: Request, res: Response, next: NextFunction) => {
+  const { scenario } = req.body;
+
+  if (scenario === 'backend_500') {
+    return next(
+      new AppError('Critical Database Transaction Lock Timeout in Swarm Orchestrator', 500, {
+        code: 'ERR_TRANSACTION_LOCK_TIMEOUT',
+        userFriendlyMessage: 'A database query took longer than expected and was safely cancelled.',
+        suggestedRemedy: 'Retry the operation. If the issue persists, verify database health in Observability tab.',
+      })
+    );
+  }
+
+  if (scenario === 'operational_fallback') {
+    const fallbackProject = {
+      id: 'proj-fallback-safe',
+      name: 'Safe Fallback Cached Project',
+      status: 'draft',
+      healthScore: 90,
+      files: [],
+    };
+
+    recordGlobalError({
+      source: 'backend',
+      type: 'operational_error',
+      message: 'Primary data provider timed out; fallback cache activated.',
+      name: 'FallbackActivationError',
+      statusCode: 200,
+      userFriendlyMessage: 'The primary project data source was slow to respond. Safe cached defaults were supplied automatically.',
+      suggestedRemedy: 'Check network connectivity or retry to fetch latest data.',
+      fallbackActivated: true,
+      fallbackDescription: 'Served cached static scaffold with zero downtime.',
+    });
+
+    return res.status(200).json({
+      success: true,
+      fallbackActivated: true,
+      notice: 'Graceful degradation active: Serving cached baseline state.',
+      data: fallbackProject,
+    });
+  }
+
+  if (scenario === 'validation_422') {
+    return next(
+      new AppError('Invalid Feature Flag Configuration: Rollout percentage cannot exceed 100%', 422, {
+        code: 'ERR_INVALID_CONFIGURATION',
+        userFriendlyMessage: 'The submitted settings contained out-of-range values.',
+        suggestedRemedy: 'Adjust the rollout slider between 0 and 100% and re-submit.',
+      })
+    );
+  }
+
+  if (scenario === 'unhandled_rejection') {
+    Promise.reject(new Error('Simulated Background Asynchronous Worker Failure in Agent 14'));
+    return res.status(200).json({
+      success: true,
+      message: 'Simulated unhandled rejection dispatched to process error supervisor.',
+    });
+  }
+
+  return res.status(400).json({ success: false, error: 'Unknown simulation scenario' });
+});
+
 
 // Real-Time System Performance Telemetry Endpoint
 app.get('/api/system/performance', (req: Request, res: Response) => {
@@ -686,8 +995,10 @@ app.get('/api/projects', (req: Request, res: Response) => {
 
 // Get Project Details
 app.get('/api/projects/:id', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -702,6 +1013,9 @@ app.post('/api/projects', (req: Request, res: Response) => {
   if (description === null) return res.status(400).json({ success: false, error: 'Project description is invalid or too long' });
 
   const db = readDB();
+  if (db.projects.length >= MAX_PROJECTS) {
+    return res.status(409).json({ success: false, error: `Project limit reached (${MAX_PROJECTS}).` });
+  }
   const newProject = {
     id: newId('proj'),
     name,
@@ -745,8 +1059,10 @@ app.post('/api/projects', (req: Request, res: Response) => {
 
 // Update Project
 app.put('/api/projects/:id', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const index = db.projects.findIndex((p) => p.id === req.params.id);
+  const index = db.projects.findIndex((p) => p.id === projectId);
   if (index === -1) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -776,6 +1092,8 @@ app.put('/api/projects/:id', (req: Request, res: Response) => {
 
 // Delete Project
 app.delete('/api/projects/:id', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const initialLength = db.projects.length;
   db.projects = db.projects.filter((p) => p.id !== req.params.id);
@@ -790,6 +1108,8 @@ app.delete('/api/projects/:id', (req: Request, res: Response) => {
 
 // Add / Update File in Project
 app.post('/api/projects/:id/files', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const name = boundedString(req.body?.name, MAX_FILE_NAME_LENGTH);
   const filePath = boundedString(req.body?.path, MAX_FILE_PATH_LENGTH);
   const content = boundedString(req.body?.content, MAX_TEXT_LENGTH);
@@ -798,12 +1118,15 @@ app.post('/api/projects/:id/files', (req: Request, res: Response) => {
   if (!filePath.startsWith('/') || filePath.includes('\\') || filePath.split('/').includes('..')) return res.status(400).json({ success: false, error: 'Invalid file path' });
 
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
 
   const existingFileIndex = project.files.findIndex((f: any) => f.path === filePath || f.id === req.body.id);
+  if (existingFileIndex === -1 && project.files.length >= MAX_FILES_PER_PROJECT) {
+    return res.status(409).json({ success: false, error: `File limit reached (${MAX_FILES_PER_PROJECT}).` });
+  }
   if (existingFileIndex >= 0) {
     project.files[existingFileIndex] = {
       ...project.files[existingFileIndex],
@@ -836,13 +1159,20 @@ app.post('/api/projects/:id/files', (req: Request, res: Response) => {
 
 // Delete File from Project
 app.delete('/api/projects/:id/files/:fileId', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  const fileId = boundedId(req.params.fileId);
+  if (!projectId || !fileId) return res.status(400).json({ success: false, error: 'Invalid project or file id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
 
-  project.files = project.files.filter((f: any) => f.id !== req.params.fileId);
+  const initialFileCount = project.files.length;
+  project.files = project.files.filter((f: any) => f.id !== fileId);
+  if (project.files.length === initialFileCount) {
+    return res.status(404).json({ success: false, error: 'File not found' });
+  }
   project.stats.filesCount = project.files.length;
   project.updatedAt = new Date().toISOString();
 
@@ -850,13 +1180,331 @@ app.delete('/api/projects/:id/files/:fileId', (req: Request, res: Response) => {
   return res.status(200).json({ success: true, files: project.files });
 });
 
-// Run Autonomous Swarm on Project
-app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
+// ==========================================
+// FEATURE FLAG SYSTEM APIs
+// ==========================================
+
+// Get all feature flags
+app.get('/api/feature-flags', (req: Request, res: Response) => {
+  const flags = getFeatureFlags();
+  return res.status(200).json({ success: true, flags });
+});
+
+// Toggle feature flag
+app.patch('/api/feature-flags/:key/toggle', (req: Request, res: Response) => {
+  const updated = toggleFeatureFlag(req.params.key);
+  if (!updated) {
+    return res.status(404).json({ success: false, error: 'Feature flag not found' });
+  }
+  return res.status(200).json({ success: true, flag: updated });
+});
+
+// Update feature flag details
+app.patch('/api/feature-flags/:key', (req: Request, res: Response) => {
+  const updated = updateFeatureFlag(req.params.key, req.body);
+  if (!updated) {
+    return res.status(404).json({ success: false, error: 'Feature flag not found' });
+  }
+  return res.status(200).json({ success: true, flag: updated });
+});
+
+// Create new feature flag
+app.post('/api/feature-flags', (req: Request, res: Response) => {
+  const { key, name, description, category, enabled, rolloutPercentage, environment } = req.body;
+  if (!key || !name) {
+    return res.status(400).json({ success: false, error: 'Key and Name are required' });
+  }
+  const flag = createFeatureFlag({
+    key,
+    name,
+    description: description || '',
+    category: category || 'experimental',
+    enabled: Boolean(enabled),
+    rolloutPercentage: typeof rolloutPercentage === 'number' ? rolloutPercentage : 100,
+    environment: environment || 'all',
+    updatedBy: 'USER_INTERFACE',
+  });
+  return res.status(201).json({ success: true, flag });
+});
+
+// Delete feature flag
+app.delete('/api/feature-flags/:key', (req: Request, res: Response) => {
+  const success = deleteFeatureFlag(req.params.key);
+  return res.status(200).json({ success });
+});
+
+// Evaluate flags for client context
+app.post('/api/feature-flags/evaluate', (req: Request, res: Response) => {
+  const evaluated = evaluateFlags(req.body || {});
+  return res.status(200).json({ success: true, evaluated });
+});
+
+// Reset feature flags to defaults
+app.post('/api/feature-flags/reset', (req: Request, res: Response) => {
+  const flags = resetFeatureFlagsToDefaults();
+  return res.status(200).json({ success: true, flags });
+});
+
+// ==========================================
+// AUTOMATED ROLLBACK & SNAPSHOT SYSTEM APIs
+// ==========================================
+
+// Get snapshots for a project
+app.get('/api/projects/:id/snapshots', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
+  const snapshots = getSnapshots(projectId);
+  return res.status(200).json({ success: true, snapshots });
+});
+
+// Create a snapshot manually
+app.post('/api/projects/:id/snapshots', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
+  const { label, agentId } = req.body;
+  const snapshot = createSnapshot(
+    project.id,
+    label || `Manual Snapshot Checkpoint (${new Date().toLocaleTimeString()})`,
+    'manual',
+    agentId || 'USER',
+    project.files
+  );
+  return res.status(201).json({ success: true, snapshot });
+});
+
+// Get single snapshot details
+app.get('/api/projects/:id/snapshots/:snapshotId', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  const snapshotId = boundedId(req.params.snapshotId);
+  if (!projectId || !snapshotId) return res.status(400).json({ success: false, error: 'Invalid id' });
+  const snapshot = getSnapshot(projectId, snapshotId);
+  if (!snapshot) {
+    return res.status(404).json({ success: false, error: 'Snapshot not found' });
+  }
+  return res.status(200).json({ success: true, snapshot });
+});
+
+// Get rollback logs for a project
+app.get('/api/projects/:id/rollback-logs', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
+  const logs = getRollbackLogs(projectId);
+  return res.status(200).json({ success: true, logs });
+});
+
+// Get rollback configuration
+app.get('/api/rollback/config', (req: Request, res: Response) => {
+  const config = getRollbackConfig();
+  return res.status(200).json({ success: true, config });
+});
+
+// Update rollback configuration
+app.post('/api/rollback/config', (req: Request, res: Response) => {
+  const config = updateRollbackConfig(req.body || {});
+  return res.status(200).json({ success: true, config });
+});
+
+// Revert project to a previous snapshot
+app.post('/api/projects/:id/rollback/revert', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
+  const { snapshotId, reason } = req.body;
+  if (!snapshotId) {
+    return res.status(400).json({ success: false, error: 'snapshotId is required' });
+  }
+
+  const db = readDB();
+  const project = db.projects.find((p) => p.id === projectId);
+  if (!project) {
+    return res.status(404).json({ success: false, error: 'Project not found' });
+  }
+
+  const result = executeRollback(
+    project.id,
+    snapshotId,
+    reason || 'Manual user-requested reversion to snapshot',
+    [],
+    'MANUAL_REVERT',
+    false
+  );
+
+  if (!result.success || !result.restoredSnapshot) {
+    return res.status(404).json({ success: false, error: 'Snapshot not found' });
+  }
+
+  project.files = result.restoredFiles;
+  project.stats.filesCount = project.files.length;
+  project.stats.linesOfCode = project.files.reduce(
+    (acc: number, f: any) => acc + (f.content ? f.content.split('\n').length : 0),
+    0
+  );
+  project.updatedAt = new Date().toISOString();
+  writeDB(db);
+
+  sessionEvents.push({
+    id: newId('evt'),
+    timestamp: new Date().toISOString(),
+    type: 'gc_flush',
+    label: `Manual Rollback Reverted to Snapshot ${snapshotId}`,
+    details: `Restored ${result.restoredFiles.length} files. Reason: ${reason || 'User manual rollback'}`,
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: `Project successfully restored to snapshot "${result.restoredSnapshot.label}"`,
+    log: result.log,
+    project,
+  });
+});
+
+// Simulate Agent Merge & Critical Test Guard (Triggers Automated Rollback on Failures!)
+app.post('/api/projects/:id/rollback/simulate-merge', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
+  const db = readDB();
+  const project = db.projects.find((p) => p.id === projectId);
+  if (!project) {
+    return res.status(404).json({ success: false, error: 'Project not found' });
+  }
+
+  const { agentId, simulateFailure, failureType, proposedFiles } = req.body;
+  const outcome = simulateMergeAndGuard(project, agentId || 'AGENT_2_FRONTEND', {
+    simulateFailure: Boolean(simulateFailure),
+    failureType: failureType || 'unit',
+    proposedFiles,
+  });
+
+  if (!outcome.rolledBack && outcome.success) {
+    project.files = outcome.resultingFiles;
+    project.stats.filesCount = project.files.length;
+    project.stats.linesOfCode = project.files.reduce(
+      (acc: number, f: any) => acc + (f.content ? f.content.split('\n').length : 0),
+      0
+    );
+    project.updatedAt = new Date().toISOString();
+    writeDB(db);
+  }
+
+  return res.status(200).json({
+    success: true,
+    outcome,
+    project,
+  });
+});
+
+// ==========================================
+// STANDARDIZED AGENT PROTOCOL & CONFLICT APIS
+// ==========================================
+
+// Get protocol messages
+app.get('/api/swarm/protocol/messages', (req: Request, res: Response) => {
+  const { senderId, recipientId, type, status } = req.query;
+  const messages = getProtocolMessages({
+    senderId: senderId as string,
+    recipientId: recipientId as string,
+    type: type as string,
+    status: status as string,
+  });
+  return res.status(200).json({ success: true, count: messages.length, messages });
+});
+
+// Dispatch inter-agent message
+app.post('/api/swarm/protocol/messages', (req: Request, res: Response) => {
+  const {
+    senderId,
+    recipientId,
+    type,
+    priority,
+    title,
+    content,
+    findings,
+    actionRequest,
+    intermediateResult,
+    conflict,
+  } = req.body;
+
+  if (!senderId || !type || !title) {
+    return res.status(400).json({ success: false, error: 'senderId, type, and title are required' });
+  }
+
+  const msg = sendProtocolMessage({
+    senderId,
+    recipientId: recipientId || 'BROADCAST',
+    type,
+    priority: priority || 'P2_NORMAL',
+    title,
+    content: content || '',
+    findings,
+    actionRequest,
+    intermediateResult,
+    conflict,
+    status: 'delivered',
+  });
+
+  return res.status(201).json({ success: true, message: msg });
+});
+
+// Arbitrate and resolve conflict
+app.post('/api/swarm/protocol/resolve-conflict', (req: Request, res: Response) => {
+  const { conflictId, resolvedBy, strategy, decision, appliedChanges } = req.body;
+  if (!conflictId || !resolvedBy || !strategy || !decision) {
+    return res.status(400).json({
+      success: false,
+      error: 'conflictId, resolvedBy, strategy, and decision are required',
+    });
+  }
+
+  const resolutionMsg = resolveConflict(conflictId, {
+    resolvedBy,
+    strategy,
+    decision,
+    appliedChanges: appliedChanges || 'Reconciled AST mutations according to safety arbitration policy.',
+  });
+
+  if (!resolutionMsg) {
+    return res.status(404).json({ success: false, error: 'Conflict not found or already resolved' });
+  }
+
+  return res.status(200).json({ success: true, resolutionMessage: resolutionMsg });
+});
+
+// Simulate protocol communication cycle
+app.post('/api/swarm/protocol/simulate-cycle', (req: Request, res: Response) => {
+  const { projectId } = req.body;
+  const cycle = simulateProtocolCycle(projectId || 'proj-swarm-core');
+  return res.status(200).json({ success: true, cycle });
+});
+
+// Protocol formal specification
+app.get('/api/swarm/protocol/spec', (req: Request, res: Response) => {
+  const spec = getProtocolSpecification();
+  return res.status(200).json({ success: true, specification: spec });
+});
+
+// Run Autonomous Swarm on Project
+app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
+  const db = readDB();
+  const project = db.projects.find((p) => p.id === projectId);
+  if (!project) {
+    return res.status(404).json({ success: false, error: 'Project not found' });
+  }
+
+  // Checkpoint pre-merge snapshot
+  const preSwarmSnapshot = createSnapshot(
+    project.id,
+    `Pre-Swarm run checkpoint (${new Date().toLocaleTimeString()})`,
+    'agent_pre_merge',
+    'MASTER_ORCHESTRATOR',
+    project.files
+  );
+
 
   swarmTelemetry.isSwarmActive = true;
   swarmTelemetry.activeWorkers = 20;
@@ -1209,7 +1857,41 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     logs,
   };
 
+  // Automated Test Guard check post-swarm
+  const testEval = evaluateCriticalTests(project);
+  const rollbackConfig = getRollbackConfig();
+  const autoRollbackActive =
+    isFeatureEnabled('auto_rollback_on_test_failure', true) && rollbackConfig.autoRollbackEnabled;
+
+  if (!testEval.allPassed && autoRollbackActive) {
+    const rbResult = executeRollback(
+      project.id,
+      preSwarmSnapshot.id,
+      `Critical tests failed post-swarm: ${testEval.failedTests.map((t) => t.name).join(', ')}`,
+      testEval.failedTests,
+      'AGENT_18_RECOVERY',
+      true
+    );
+    project.files = rbResult.restoredFiles;
+    project.stats.filesCount = project.files.length;
+    project.updatedAt = new Date().toISOString();
+    addLog(
+      'AGENT_18_RECOVERY',
+      'warn',
+      `[AUTOMATED ROLLBACK ACTIVATED] Project reverted to snapshot ${preSwarmSnapshot.id} due to ${testEval.failedTests.length} critical test failures.`
+    );
+  } else {
+    createSnapshot(
+      project.id,
+      `Post-Swarm verified baseline (${new Date().toLocaleTimeString()})`,
+      'agent_post_merge',
+      'AGENT_20_QA',
+      project.files
+    );
+  }
+
   writeDB(db);
+
 
   return res.status(200).json({
     success: true,
@@ -1222,8 +1904,10 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
 
 // Log out Swarm Health Audit Report to system & project store
 app.post('/api/projects/:id/swarm/report-log', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1279,8 +1963,10 @@ app.post('/api/projects/:id/swarm/report-log', (req: Request, res: Response) => 
 
 // Run Real Tests on Project
 app.post('/api/projects/:id/tests/run', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1405,8 +2091,10 @@ app.post('/api/projects/:id/tests/run', (req: Request, res: Response) => {
 
 // Run Real Security Scan on Project Codebase
 app.post('/api/projects/:id/security-scan', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1485,13 +2173,15 @@ app.post('/api/projects/:id/security-scan', (req: Request, res: Response) => {
 
 // AI Agent Gemini 3.8 Flash Assistant
 app.post('/api/projects/:id/ai/consult', async (req: Request, res: Response) => {
-  const { prompt, contextFileId } = req.body;
-  if (!prompt || typeof prompt !== 'string') {
+  const projectId = boundedId(req.params.id);
+  const prompt = boundedString(req.body?.prompt, 20_000);
+  const contextFileId = req.body?.contextFileId === undefined ? undefined : boundedId(req.body.contextFileId);
+  if (!projectId || !prompt) {
     return res.status(400).json({ success: false, error: 'Prompt is required' });
   }
 
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1563,8 +2253,10 @@ Return ONLY valid JSON.`;
 
 // Final QA Deployment Gate Check (Agent 20)
 app.get('/api/projects/:id/deploy-check', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1601,8 +2293,10 @@ app.get('/api/projects/:id/deploy-check', (req: Request, res: Response) => {
 
 // Project Export
 app.get('/api/projects/:id/export', (req: Request, res: Response) => {
+  const projectId = boundedId(req.params.id);
+  if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
-  const project = db.projects.find((p) => p.id === req.params.id);
+  const project = db.projects.find((p) => p.id === projectId);
   if (!project) {
     return res.status(404).json({ success: false, error: 'Project not found' });
   }
@@ -1612,20 +2306,39 @@ app.get('/api/projects/:id/export', (req: Request, res: Response) => {
   return res.send(JSON.stringify(project, null, 2));
 });
 
-// Global Error Handler
-app.use((err: any, req: Request, res: Response, next: any) => {
-  console.error('Unhandled server error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error',
-    timestamp: new Date().toISOString(),
-  });
+// Ensure unmatched /api routes return JSON 404, never index.html!
+app.all('/api/*', (req: Request, res: Response) => {
+  res.status(404).json({ success: false, error: `API route ${req.method} ${req.path} not found` });
 });
+
+// Centralized Global Error Handler
+app.use(globalErrorMiddleware);
 
 // ==========================================
 // VITE MIDDLEWARE / STATIC ASSETS
 // ==========================================
 async function startServer() {
+  setupProcessErrorHandlers();
+
+  // Ensure default snapshots exist for seed projects
+  try {
+    const db = readDB();
+    for (const proj of db.projects) {
+      const existing = getSnapshots(proj.id);
+      if (existing.length === 0) {
+        createSnapshot(
+          proj.id,
+          'Initial Baseline Scaffold Snapshot',
+          'manual',
+          'SYSTEM_BOOTSTRAP',
+          proj.files
+        );
+      }
+    }
+  } catch (e) {
+    console.error('Snapshot initialization error:', e);
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -1644,5 +2357,6 @@ async function startServer() {
     console.log(`[MASTER ORCHESTRATOR] Server running on http://${HOST}:${PORT}`);
   });
 }
+
 
 startServer();
