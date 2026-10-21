@@ -3,7 +3,7 @@
 ## Stack
 - **Runtime**: Node.js 22 (via `node:22-slim`), Bun as package manager (`bun.lock`)
 - **Dev command**: `tsx server.ts` — Express server with Vite in middleware mode (single origin, port 3000)
-- **Frontend**: React 19 + Vite 6 + Tailwind 4, served through the Express server (not a separate dev server)
+- **Frontend**: React 19 + Vite 8 + Tailwind 4, served through the Express server (not a separate dev server)
 - **Storage**: JSON file-system store in `data/` (db.json, feature-flags.json, alerts.json, error-history.json)
 
 ## Setup quirks
