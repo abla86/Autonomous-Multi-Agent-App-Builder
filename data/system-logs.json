@@ -1,0 +1,1443 @@
+[
+  {
+    "id": "log-1792606040972-i45vv",
+    "timestamp": "2026-10-21T18:07:20.972Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "7c823de8-0468-46d7-9dee-f973ee6664fe",
+    "metadata": {
+      "contentLength": "21279"
+    }
+  },
+  {
+    "id": "log-1792606040010-fscys",
+    "timestamp": "2026-10-21T18:07:20.010Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "136bc6ac-5fef-493d-8aa4-f1ac1839e897",
+    "metadata": {
+      "contentLength": "21162"
+    }
+  },
+  {
+    "id": "log-1792606039003-eckn0",
+    "timestamp": "2026-10-21T18:07:19.003Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.2ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.2,
+    "traceId": "303a4352-3093-4d5c-aa54-5e08e3b5ed6e",
+    "metadata": {
+      "contentLength": "21051"
+    }
+  },
+  {
+    "id": "log-1792606037978-7us7c",
+    "timestamp": "2026-10-21T18:07:17.978Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "3a8f317a-5844-4044-a2db-2dbf817c53d5",
+    "metadata": {
+      "contentLength": "20938"
+    }
+  },
+  {
+    "id": "log-1792606036969-sqhs6",
+    "timestamp": "2026-10-21T18:07:16.969Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.7ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "f6a58616-be86-4171-94e2-c7b22c00c41b",
+    "metadata": {
+      "contentLength": "20827"
+    }
+  },
+  {
+    "id": "log-1792606035966-8m1w5",
+    "timestamp": "2026-10-21T18:07:15.966Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "e3c2c812-ae0f-4a3b-b86f-27441947da98",
+    "metadata": {
+      "contentLength": "20710"
+    }
+  },
+  {
+    "id": "log-1792606034969-5y7th",
+    "timestamp": "2026-10-21T18:07:14.969Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.2ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.2,
+    "traceId": "0c0c304d-daac-4e18-96a6-fc3aaf06cfb0",
+    "metadata": {
+      "contentLength": "20600"
+    }
+  },
+  {
+    "id": "log-1792606033972-8ys12",
+    "timestamp": "2026-10-21T18:07:13.972Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1,
+    "traceId": "f9b2e67b-8271-43bc-a1f9-16de6a5f3f28",
+    "metadata": {
+      "contentLength": "20490"
+    }
+  },
+  {
+    "id": "log-1792606033016-tpcj8",
+    "timestamp": "2026-10-21T18:07:13.016Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.1ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.1,
+    "traceId": "fb3f22ce-83b8-4a05-a952-f7c404f9b3bc",
+    "metadata": {
+      "contentLength": "20377"
+    }
+  },
+  {
+    "id": "log-1792606031982-a32dt",
+    "timestamp": "2026-10-21T18:07:11.982Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "a3256b99-879d-4808-8206-4e98a54234b2",
+    "metadata": {
+      "contentLength": "20270"
+    }
+  },
+  {
+    "id": "log-1792606030967-uokx7",
+    "timestamp": "2026-10-21T18:07:10.967Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "f52c7fdb-052b-4169-a892-6188f32a2725",
+    "metadata": {
+      "contentLength": "20156"
+    }
+  },
+  {
+    "id": "log-1792606029967-y4r0x",
+    "timestamp": "2026-10-21T18:07:09.967Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "dfdefde8-f565-45cc-810e-e2a13c299ddf",
+    "metadata": {
+      "contentLength": "20048"
+    }
+  },
+  {
+    "id": "log-1792606028979-dol9v",
+    "timestamp": "2026-10-21T18:07:08.979Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.7ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "f1a13768-560c-404c-a3e0-7e2d3b7f1fe4",
+    "metadata": {
+      "contentLength": "19940"
+    }
+  },
+  {
+    "id": "log-1792606028727-ml35x",
+    "timestamp": "2026-10-21T18:07:08.727Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/health -> 200 (0.7ms)",
+    "method": "GET",
+    "path": "/api/health",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "req-1792606028726-wsnkp",
+    "metadata": {
+      "contentLength": "1889"
+    }
+  },
+  {
+    "id": "log-1792606027985-edptz",
+    "timestamp": "2026-10-21T18:07:07.985Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "55cad219-7daa-40c8-9668-e3ef10f21006",
+    "metadata": {
+      "contentLength": "19829"
+    }
+  },
+  {
+    "id": "log-1792606026980-udfok",
+    "timestamp": "2026-10-21T18:07:06.980Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "f3a34823-fdc0-45b9-811b-7eb3026cf066",
+    "metadata": {
+      "contentLength": "19716"
+    }
+  },
+  {
+    "id": "log-1792606025970-xswua",
+    "timestamp": "2026-10-21T18:07:05.970Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "793c5564-0f19-470b-87c5-f0cfd4154f30",
+    "metadata": {
+      "contentLength": "19602"
+    }
+  },
+  {
+    "id": "log-1792606024976-w5184",
+    "timestamp": "2026-10-21T18:07:04.976Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.1ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.1,
+    "traceId": "b7608e00-57bc-4938-a1cb-a643eb29eaf8",
+    "metadata": {
+      "contentLength": "19490"
+    }
+  },
+  {
+    "id": "log-1792606023993-0cpdl",
+    "timestamp": "2026-10-21T18:07:03.993Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1,
+    "traceId": "7c11907e-6cb4-4ebc-aaf0-e201c48f5523",
+    "metadata": {
+      "contentLength": "19375"
+    }
+  },
+  {
+    "id": "log-1792606022974-jk3r4",
+    "timestamp": "2026-10-21T18:07:02.974Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.5ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.5,
+    "traceId": "937236a2-b7f9-4c24-b841-32d0df0e5e61",
+    "metadata": {
+      "contentLength": "19262"
+    }
+  },
+  {
+    "id": "log-1792606021975-itybs",
+    "timestamp": "2026-10-21T18:07:01.975Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "a1ac1d36-c22a-4416-9689-1400e638f146",
+    "metadata": {
+      "contentLength": "19146"
+    }
+  },
+  {
+    "id": "log-1792606020994-tidh6",
+    "timestamp": "2026-10-21T18:07:00.994Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1,
+    "traceId": "a015b990-fe17-4436-b6b4-f614ea64cb8f",
+    "metadata": {
+      "contentLength": "19030"
+    }
+  },
+  {
+    "id": "log-1792606019963-cntjq",
+    "timestamp": "2026-10-21T18:06:59.963Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "bf2e5179-90e7-42c6-95bc-c1be82f90b21",
+    "metadata": {
+      "contentLength": "18918"
+    }
+  },
+  {
+    "id": "log-1792606018971-9bwcc",
+    "timestamp": "2026-10-21T18:06:58.971Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "a7a051de-845d-4e04-b4dd-b98724639e17",
+    "metadata": {
+      "contentLength": "18801"
+    }
+  },
+  {
+    "id": "log-1792606017997-dmmpn",
+    "timestamp": "2026-10-21T18:06:57.997Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "f053bcf6-bceb-47de-83ec-6fc1971474da",
+    "metadata": {
+      "contentLength": "18688"
+    }
+  },
+  {
+    "id": "log-1792606016975-5l4az",
+    "timestamp": "2026-10-21T18:06:56.975Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "dd6fe51a-3f41-40a9-9b0a-6762ca0f1279",
+    "metadata": {
+      "contentLength": "18576"
+    }
+  },
+  {
+    "id": "log-1792606015978-zaqop",
+    "timestamp": "2026-10-21T18:06:55.978Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "5e4fc9e1-6a76-4fc8-a8a5-1706ab368c1b",
+    "metadata": {
+      "contentLength": "18460"
+    }
+  },
+  {
+    "id": "log-1792606014994-vly2h",
+    "timestamp": "2026-10-21T18:06:54.994Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.7ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "e0f6d151-1e96-4f69-9ce3-9575d97e58cf",
+    "metadata": {
+      "contentLength": "18344"
+    }
+  },
+  {
+    "id": "log-1792606013986-d0thy",
+    "timestamp": "2026-10-21T18:06:53.986Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "26c1ae70-c855-4473-9e41-7233c24f7217",
+    "metadata": {
+      "contentLength": "18226"
+    }
+  },
+  {
+    "id": "log-1792606013681-13q95",
+    "timestamp": "2026-10-21T18:06:53.681Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/health -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/health",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "req-1792606013680-6c5fz",
+    "metadata": {
+      "contentLength": "1889"
+    }
+  },
+  {
+    "id": "log-1792606012996-zo3ql",
+    "timestamp": "2026-10-21T18:06:52.996Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "e9cb9452-5e03-41cd-ad4c-d5516bb560ae",
+    "metadata": {
+      "contentLength": "18115"
+    }
+  },
+  {
+    "id": "log-1792606012003-46kjm",
+    "timestamp": "2026-10-21T18:06:52.003Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "4d8b5a52-ef11-4701-96f9-f6f32ccb4f18",
+    "metadata": {
+      "contentLength": "17999"
+    }
+  },
+  {
+    "id": "log-1792606010979-5tb1x",
+    "timestamp": "2026-10-21T18:06:50.979Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "37d6f7ef-e153-4cc2-b971-26cf7fec5de2",
+    "metadata": {
+      "contentLength": "17885"
+    }
+  },
+  {
+    "id": "log-1792606010115-zgwfp",
+    "timestamp": "2026-10-21T18:06:50.115Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.2ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.2,
+    "traceId": "2e5a2182-5876-44b2-9b4a-c129ce9705b7",
+    "metadata": {
+      "contentLength": "17770"
+    }
+  },
+  {
+    "id": "log-1792606009254-jlgqa",
+    "timestamp": "2026-10-21T18:06:49.254Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "DELETE /api/feature-flags/missing-key -> 200 (0.3ms)",
+    "method": "DELETE",
+    "path": "/api/feature-flags/missing-key",
+    "statusCode": 200,
+    "responseTimeMs": 0.3,
+    "traceId": "req-1792606009253-e6l6d",
+    "metadata": {
+      "contentLength": "17"
+    }
+  },
+  {
+    "id": "log-1792606009246-y64ac",
+    "timestamp": "2026-10-21T18:06:49.246Z",
+    "level": "warn",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "PATCH /api/feature-flags/missing-key -> 404 (0.6ms)",
+    "method": "PATCH",
+    "path": "/api/feature-flags/missing-key",
+    "statusCode": 404,
+    "responseTimeMs": 0.6,
+    "traceId": "req-1792606009245-epyrj",
+    "metadata": {
+      "contentLength": "50"
+    }
+  },
+  {
+    "id": "log-1792606009238-qhwas",
+    "timestamp": "2026-10-21T18:06:49.238Z",
+    "level": "warn",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "POST /api/system/errors/missing-id/resolve -> 404 (0.4ms)",
+    "method": "POST",
+    "path": "/api/system/errors/missing-id/resolve",
+    "statusCode": 404,
+    "responseTimeMs": 0.4,
+    "traceId": "req-1792606009238-ms64m",
+    "metadata": {
+      "contentLength": "50"
+    }
+  },
+  {
+    "id": "log-1792606009231-7eski",
+    "timestamp": "2026-10-21T18:06:49.231Z",
+    "level": "warn",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "POST /api/monitoring/alerts/missing-id/resolve -> 404 (0.4ms)",
+    "method": "POST",
+    "path": "/api/monitoring/alerts/missing-id/resolve",
+    "statusCode": 404,
+    "responseTimeMs": 0.4,
+    "traceId": "req-1792606009230-obnur",
+    "metadata": {
+      "contentLength": "43"
+    }
+  },
+  {
+    "id": "log-1792606009223-t19t6",
+    "timestamp": "2026-10-21T18:06:49.223Z",
+    "level": "warn",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "POST /api/monitoring/alerts/missing-id/ack -> 404 (0.8ms)",
+    "method": "POST",
+    "path": "/api/monitoring/alerts/missing-id/ack",
+    "statusCode": 404,
+    "responseTimeMs": 0.8,
+    "traceId": "req-1792606009222-8tqxx",
+    "metadata": {
+      "contentLength": "43"
+    }
+  },
+  {
+    "id": "log-1792606009196-w6hi3",
+    "timestamp": "2026-10-21T18:06:49.196Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "d545e882-03bb-4f1b-96dc-c0c351c09854",
+    "metadata": {
+      "contentLength": "17653"
+    }
+  },
+  {
+    "id": "log-1792606008077-aadli",
+    "timestamp": "2026-10-21T18:06:48.077Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.6ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.6,
+    "traceId": "ea56372c-b5d8-4594-9ac4-0474ce0b7de7",
+    "metadata": {
+      "contentLength": "17536"
+    }
+  },
+  {
+    "id": "log-1792606006972-0pmvn",
+    "timestamp": "2026-10-21T18:06:46.972Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.3ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.3,
+    "traceId": "f51b62ad-d830-4aff-b3b4-5d1230e835cf",
+    "metadata": {
+      "contentLength": "17421"
+    }
+  },
+  {
+    "id": "log-1792606006029-ipyes",
+    "timestamp": "2026-10-21T18:06:46.029Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.2ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.2,
+    "traceId": "32224cd3-ca96-4a43-af7e-37e4fdeb3f38",
+    "metadata": {
+      "contentLength": "17303"
+    }
+  },
+  {
+    "id": "log-1792606004965-rwhn8",
+    "timestamp": "2026-10-21T18:06:44.965Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.5ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.5,
+    "traceId": "d686824b-544f-4f8b-acef-5ed5f357f867",
+    "metadata": {
+      "contentLength": "17185"
+    }
+  },
+  {
+    "id": "log-1792606003979-w6h8j",
+    "timestamp": "2026-10-21T18:06:43.979Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.4ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.4,
+    "traceId": "5140dbb3-5c61-4380-b930-2cc8108f7d14",
+    "metadata": {
+      "contentLength": "17068"
+    }
+  },
+  {
+    "id": "log-1792606002986-lbii0",
+    "timestamp": "2026-10-21T18:06:42.986Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.3ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.3,
+    "traceId": "93423bcf-6839-4161-a071-e026596bd55c",
+    "metadata": {
+      "contentLength": "16952"
+    }
+  },
+  {
+    "id": "log-1792606001974-fchs5",
+    "timestamp": "2026-10-21T18:06:41.974Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "c07d71b9-05cb-4abb-9565-7e0ab83c09a2",
+    "metadata": {
+      "contentLength": "16833"
+    }
+  },
+  {
+    "id": "log-1792606000966-dual2",
+    "timestamp": "2026-10-21T18:06:40.966Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (1.1ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 1.1,
+    "traceId": "89f8d1de-5971-493e-bcc8-7edca359ac24",
+    "metadata": {
+      "contentLength": "16716"
+    }
+  },
+  {
+    "id": "log-1792605999993-7p98b",
+    "timestamp": "2026-10-21T18:06:39.993Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "0aea7e67-530e-4f3d-b210-6a5043cdb42f",
+    "metadata": {
+      "contentLength": "16598"
+    }
+  },
+  {
+    "id": "log-1792605998985-jsb99",
+    "timestamp": "2026-10-21T18:06:38.985Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "70075830-0ca6-4b0c-82ea-255a361f37ba",
+    "metadata": {
+      "contentLength": "16482"
+    }
+  },
+  {
+    "id": "log-1792605998641-qa3cg",
+    "timestamp": "2026-10-21T18:06:38.641Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/health -> 200 (1.2ms)",
+    "method": "GET",
+    "path": "/api/health",
+    "statusCode": 200,
+    "responseTimeMs": 1.2,
+    "traceId": "req-1792605998639-c72k6",
+    "metadata": {
+      "contentLength": "1887"
+    }
+  },
+  {
+    "id": "log-1792605998000-01s7h",
+    "timestamp": "2026-10-21T18:06:38.000Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "b6f8086b-0b76-4279-8df3-6ee6758bd57e",
+    "metadata": {
+      "contentLength": "16363"
+    }
+  },
+  {
+    "id": "log-1792605997131-bi4ou",
+    "timestamp": "2026-10-21T18:06:37.131Z",
+    "level": "info",
+    "category": "user_action",
+    "source": "frontend",
+    "action": "CLIENT_INITIALIZED",
+    "message": "Frontend logging & monitoring client supervisor started.",
+    "traceId": "tr-tlx69a9"
+  },
+  {
+    "id": "log-1792605996985-bhqcb",
+    "timestamp": "2026-10-21T18:06:36.985Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "dc3b0f1d-c135-4421-a132-eb0e914201a2",
+    "metadata": {
+      "contentLength": "16246"
+    }
+  },
+  {
+    "id": "log-1792605996145-bf62a",
+    "timestamp": "2026-10-21T18:06:36.145Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "69e3445b-8f5e-46f0-8b52-219e2f2dd97a",
+    "metadata": {
+      "contentLength": "16127"
+    }
+  },
+  {
+    "id": "log-1792605995966-5wwtj",
+    "timestamp": "2026-10-21T18:06:35.966Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/performance -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/system/performance",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "f59d7f42-469a-4301-97c4-f1edd07ff773",
+    "metadata": {
+      "contentLength": "16126"
+    }
+  },
+  {
+    "id": "log-1792605995814-w0ua5",
+    "timestamp": "2026-10-21T18:06:35.814Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/projects -> 304 (0.8ms)",
+    "method": "GET",
+    "path": "/api/projects",
+    "statusCode": 304,
+    "responseTimeMs": 0.8,
+    "traceId": "ca899b1d-d1e3-4124-a9ec-08ba955a137c",
+    "metadata": {}
+  },
+  {
+    "id": "log-1792605995798-kp8h3",
+    "timestamp": "2026-10-21T18:06:35.798Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/status -> 200 (0.8ms)",
+    "method": "GET",
+    "path": "/api/system/status",
+    "statusCode": 200,
+    "responseTimeMs": 0.8,
+    "traceId": "d6ded512-6684-4e68-8aa4-9899af7e098c",
+    "metadata": {
+      "contentLength": "244"
+    }
+  },
+  {
+    "id": "log-1792605995641-azrg8",
+    "timestamp": "2026-10-21T18:06:35.641Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/status -> 200 (0.4ms)",
+    "method": "GET",
+    "path": "/api/system/status",
+    "statusCode": 200,
+    "responseTimeMs": 0.4,
+    "traceId": "71b46d08-7254-4ee6-83ca-edb5d0971e39",
+    "metadata": {
+      "contentLength": "244"
+    }
+  },
+  {
+    "id": "log-1792605995638-5acoj",
+    "timestamp": "2026-10-21T18:06:35.638Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/projects -> 200 (0.7ms)",
+    "method": "GET",
+    "path": "/api/projects",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "381c5cca-2b03-4f07-b787-44c642758f4c",
+    "metadata": {
+      "contentLength": "4749"
+    }
+  },
+  {
+    "id": "log-1792605987179-42e4x",
+    "timestamp": "2026-10-21T18:06:27.179Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/feature-flags -> 200 (0.5ms)",
+    "method": "GET",
+    "path": "/api/feature-flags",
+    "statusCode": 200,
+    "responseTimeMs": 0.5,
+    "traceId": "req-1792605987178-xplqk",
+    "metadata": {
+      "contentLength": "3021"
+    }
+  },
+  {
+    "id": "log-1792605987172-jjjun",
+    "timestamp": "2026-10-21T18:06:27.172Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "PATCH /api/feature-flags/auto_rollback_on_test_failure/toggle -> 200 (0.7ms)",
+    "method": "PATCH",
+    "path": "/api/feature-flags/auto_rollback_on_test_failure/toggle",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "req-1792605987171-b6c4n",
+    "metadata": {
+      "contentLength": "353"
+    }
+  },
+  {
+    "id": "log-1792605987166-mjvyx",
+    "timestamp": "2026-10-21T18:06:27.166Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "PATCH /api/feature-flags/auto_rollback_on_test_failure/toggle -> 200 (1ms)",
+    "method": "PATCH",
+    "path": "/api/feature-flags/auto_rollback_on_test_failure/toggle",
+    "statusCode": 200,
+    "responseTimeMs": 1,
+    "traceId": "req-1792605987164-yejds",
+    "metadata": {
+      "contentLength": "354"
+    }
+  },
+  {
+    "id": "log-1792605987143-d5evt",
+    "timestamp": "2026-10-21T18:06:27.143Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/feature-flags -> 200 (0.7ms)",
+    "method": "GET",
+    "path": "/api/feature-flags",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "req-1792605987142-5q8tm",
+    "metadata": {
+      "contentLength": "3026"
+    }
+  },
+  {
+    "id": "log-1792605983597-eoyuq",
+    "timestamp": "2026-10-21T18:06:23.597Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/health -> 200 (0.9ms)",
+    "method": "GET",
+    "path": "/api/health",
+    "statusCode": 200,
+    "responseTimeMs": 0.9,
+    "traceId": "req-1792605983595-3r10r",
+    "metadata": {
+      "contentLength": "1888"
+    }
+  },
+  {
+    "id": "log-1792605979536-t9dp6",
+    "timestamp": "2026-10-21T18:06:19.536Z",
+    "level": "warn",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/nope/deep/path -> 404 (0.5ms)",
+    "method": "GET",
+    "path": "/api/nope/deep/path",
+    "statusCode": 404,
+    "responseTimeMs": 0.5,
+    "traceId": "req-1792605979535-xgu06",
+    "metadata": {
+      "contentLength": "71"
+    }
+  },
+  {
+    "id": "log-1792605979528-zwmag",
+    "timestamp": "2026-10-21T18:06:19.528Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/errors -> 200 (0.3ms)",
+    "method": "GET",
+    "path": "/api/system/errors",
+    "statusCode": 200,
+    "responseTimeMs": 0.3,
+    "traceId": "req-1792605979527-iobrv",
+    "metadata": {
+      "contentLength": "2785"
+    }
+  },
+  {
+    "id": "log-1792605979520-gclg5",
+    "timestamp": "2026-10-21T18:06:19.520Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/monitoring/alerts -> 200 (0.5ms)",
+    "method": "GET",
+    "path": "/api/monitoring/alerts",
+    "statusCode": 200,
+    "responseTimeMs": 0.5,
+    "traceId": "req-1792605979520-od9y6",
+    "metadata": {
+      "contentLength": "2074"
+    }
+  },
+  {
+    "id": "log-1792605979512-1elpb",
+    "timestamp": "2026-10-21T18:06:19.512Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/feature-flags -> 200 (0.7ms)",
+    "method": "GET",
+    "path": "/api/feature-flags",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "req-1792605979511-pwrjy",
+    "metadata": {
+      "contentLength": "3026"
+    }
+  },
+  {
+    "id": "log-1792605979504-r0kru",
+    "timestamp": "2026-10-21T18:06:19.504Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/projects -> 200 (0.7ms)",
+    "method": "GET",
+    "path": "/api/projects",
+    "statusCode": 200,
+    "responseTimeMs": 0.7,
+    "traceId": "req-1792605979503-2oneo",
+    "metadata": {
+      "contentLength": "4749"
+    }
+  },
+  {
+    "id": "log-1792605979496-buwf0",
+    "timestamp": "2026-10-21T18:06:19.496Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/system/status -> 200 (1.2ms)",
+    "method": "GET",
+    "path": "/api/system/status",
+    "statusCode": 200,
+    "responseTimeMs": 1.2,
+    "traceId": "req-1792605979494-pkd8v",
+    "metadata": {
+      "contentLength": "244"
+    }
+  },
+  {
+    "id": "log-1792605975426-g6mh3",
+    "timestamp": "2026-10-21T18:06:15.426Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/health -> 200 (0.6ms)",
+    "method": "GET",
+    "path": "/api/health",
+    "statusCode": 200,
+    "responseTimeMs": 0.6,
+    "traceId": "req-1792605975425-x74ql",
+    "metadata": {
+      "contentLength": "1888"
+    }
+  },
+  {
+    "id": "log-1792605968557-6mhsp",
+    "timestamp": "2026-10-21T18:06:08.557Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/health -> 200 (1.3ms)",
+    "method": "GET",
+    "path": "/api/health",
+    "statusCode": 200,
+    "responseTimeMs": 1.3,
+    "traceId": "req-1792605968555-nihnb",
+    "metadata": {
+      "contentLength": "1887"
+    }
+  },
+  {
+    "id": "log-1792605968557-yrtbu",
+    "timestamp": "2026-10-21T18:06:08.557Z",
+    "level": "info",
+    "category": "system_health",
+    "source": "backend",
+    "action": "ALERT_RESOLVED",
+    "message": "[ALERT AUTO-RESOLVED] Elevated P95 Latency (482ms > 350ms): Metric returned to normal (39 ms).",
+    "traceId": "tr-go3j3vs",
+    "metadata": {
+      "alertId": "alert-1790771949187-be3q",
+      "normalizedValue": 39
+    }
+  },
+  {
+    "id": "log-1792605953513-uon1y",
+    "timestamp": "2026-10-21T18:05:53.513Z",
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "message": "GET /api/health -> 200 (4.2ms)",
+    "method": "GET",
+    "path": "/api/health",
+    "statusCode": 200,
+    "responseTimeMs": 4.2,
+    "traceId": "req-1792605953507-vpd55",
+    "metadata": {
+      "contentLength": "1886"
+    }
+  },
+  {
+    "id": "log-1792605953512-wrp1u",
+    "timestamp": "2026-10-21T18:05:53.512Z",
+    "level": "info",
+    "category": "system_health",
+    "source": "backend",
+    "action": "ALERT_RESOLVED",
+    "message": "[ALERT AUTO-RESOLVED] Simulated P95 Latency Degradation: Metric returned to normal (39 ms).",
+    "traceId": "tr-yuxv8hz",
+    "metadata": {
+      "alertId": "alert-sim-1790771949189",
+      "normalizedValue": 39
+    }
+  },
+  {
+    "level": "info",
+    "category": "system_health",
+    "source": "backend",
+    "action": "SYSTEM_BOOTSTRAP",
+    "message": "Autonomous Swarm Orchestrator initialized on port 3000 with 20 worker definitions.",
+    "metadata": {
+      "port": 3000,
+      "pid": 22,
+      "platform": "linux",
+      "nodeVersion": "v26.3.0"
+    },
+    "traceId": "boot-001",
+    "id": "log-1792605348833-8lpp",
+    "timestamp": "2026-10-21T17:55:48.833Z"
+  },
+  {
+    "level": "info",
+    "category": "agent_event",
+    "source": "agent_swarm",
+    "action": "AGENT_INITIALIZED",
+    "agentId": "AGENT_1_ANALYST",
+    "message": "Agent 1 (Lead System Analyst) established protocol session v2.1-swarm.",
+    "metadata": {
+      "priority": "P0",
+      "role": "Lead Architect",
+      "memoryAllocatedMb": 32
+    },
+    "traceId": "tr-swm-001",
+    "id": "log-1792605408833-cbx2",
+    "timestamp": "2026-10-21T17:56:48.833Z"
+  },
+  {
+    "level": "info",
+    "category": "agent_event",
+    "source": "agent_swarm",
+    "action": "AGENT_INITIALIZED",
+    "agentId": "AGENT_13_DEVOPS",
+    "message": "Agent 13 (DevOps & Build Specialist) bound health checks to Express endpoint /api/health.",
+    "metadata": {
+      "endpoint": "/api/health",
+      "pollIntervalMs": 5000
+    },
+    "traceId": "tr-swm-002",
+    "id": "log-1792605468833-4b70",
+    "timestamp": "2026-10-21T17:57:48.833Z"
+  },
+  {
+    "level": "info",
+    "category": "api_request",
+    "source": "backend",
+    "action": "API_REQUEST_COMPLETED",
+    "method": "GET",
+    "path": "/api/projects",
+    "statusCode": 200,
+    "responseTimeMs": 14,
+    "message": "Retrieved project catalog successfully.",
+    "traceId": "req-proj-01",
+    "metadata": {
+      "projectCount": 1,
+      "cached": true
+    },
+    "id": "log-1792605528833-6wae",
+    "timestamp": "2026-10-21T17:58:48.833Z"
+  },
+  {
+    "level": "info",
+    "category": "user_action",
+    "source": "frontend",
+    "action": "USER_NAVIGATION",
+    "message": "User navigated to 20-Agent Swarm execution console.",
+    "userId": "user_dev_01",
+    "traceId": "usr-nav-01",
+    "metadata": {
+      "activeTab": "swarm",
+      "viewport": "1920x1080"
+    },
+    "id": "log-1792605588833-eaa3",
+    "timestamp": "2026-10-21T17:59:48.833Z"
+  },
+  {
+    "level": "info",
+    "category": "rollback",
+    "source": "backend",
+    "action": "SNAPSHOT_CHECKPOINT_CREATED",
+    "agentId": "AGENT_17_INTEGRITY",
+    "message": "Pre-flight baseline snapshot created for proj-swarm-core.",
+    "traceId": "tr-snap-01",
+    "metadata": {
+      "snapshotLabel": "Initial Baseline Scaffold Snapshot",
+      "fileCount": 6
+    },
+    "id": "log-1792605648833-v3ey",
+    "timestamp": "2026-10-21T18:00:48.833Z"
+  },
+  {
+    "level": "warn",
+    "category": "performance",
+    "source": "backend",
+    "action": "HIGH_LATENCY_WARNING",
+    "message": "AST dependency tree calculation exceeded 80ms target threshold.",
+    "responseTimeMs": 94,
+    "traceId": "tr-perf-01",
+    "metadata": {
+      "targetMs": 80,
+      "actualMs": 94,
+      "agentId": "AGENT_14_DEPENDENCY"
+    },
+    "id": "log-1792605708833-eyjx",
+    "timestamp": "2026-10-21T18:01:48.833Z"
+  },
+  {
+    "level": "info",
+    "category": "flag_toggle",
+    "source": "backend",
+    "action": "FEATURE_FLAG_EVALUATION",
+    "message": "Feature flag \"automated_rollback_engine\" evaluated: TRUE for all environments.",
+    "traceId": "tr-ff-01",
+    "metadata": {
+      "key": "automated_rollback_engine",
+      "enabled": true
+    },
+    "id": "log-1792605768833-r31y",
+    "timestamp": "2026-10-21T18:02:48.833Z"
+  },
+  {
+    "level": "error",
+    "category": "error",
+    "source": "backend",
+    "action": "TEST_GUARD_INTERCEPT",
+    "agentId": "AGENT_11_TEST",
+    "message": "Simulated mutation failed Unit assertion in /src/engine/orchestrator.ts: Queue priority invariant violated.",
+    "statusCode": 422,
+    "traceId": "tr-err-01",
+    "errorDetails": {
+      "name": "AssertionError",
+      "message": "Expected task priority P0 to be scheduled at index 0",
+      "code": "ERR_ASSERTION_FAILED",
+      "stack": "AssertionError: Expected task priority P0 at index 0\n    at TestEngine.verifyQueueOrder (/src/engine/tests.ts:42:15)\n    at evaluateCriticalTests (/src/server/rollbackEngine.ts:182:11)"
+    },
+    "metadata": {
+      "testId": "CHK-01",
+      "recoveredByRollback": true
+    },
+    "id": "log-1792605828833-w9p4",
+    "timestamp": "2026-10-21T18:03:48.833Z"
+  },
+  {
+    "level": "info",
+    "category": "rollback",
+    "source": "backend",
+    "action": "AUTO_ROLLBACK_EXECUTED",
+    "agentId": "AGENT_18_RECOVERY",
+    "message": "Automated rollback triggered: Reverted 1 candidate mutation file to Snapshot SNAP-BASE-001.",
+    "traceId": "tr-rb-01",
+    "metadata": {
+      "revertedFiles": [
+        "/src/engine/orchestrator.ts"
+      ],
+      "durationMs": 18
+    },
+    "id": "log-1792605888833-c631",
+    "timestamp": "2026-10-21T18:04:48.833Z"
+  }
+]

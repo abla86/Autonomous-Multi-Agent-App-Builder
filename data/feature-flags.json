@@ -7,8 +7,8 @@
     "enabled": true,
     "rolloutPercentage": 100,
     "environment": "all",
-    "updatedAt": "2026-09-30T13:11:17.569Z",
-    "updatedBy": "SYSTEM_ORCHESTRATOR"
+    "updatedAt": "2026-10-21T18:06:27.171Z",
+    "updatedBy": "USER_INTERFACE"
   },
   {
     "key": "standard_agent_protocol",

@@ -91,6 +91,12 @@ function boundedId(value: unknown): string | null {
   return /^[A-Za-z0-9._:-]+$/.test(value) ? value : null;
 }
 
+// Express 5 types route params as `string | string[]` (wildcards can match
+// several segments). Named params are always a single string at runtime.
+function routeParam(value: string | string[]): string {
+  return Array.isArray(value) ? value[0] ?? '' : value;
+}
+
 function timingSafeApiKeyMatch(supplied: string): boolean {
   if (!API_KEY || !supplied) return false;
   const a = Buffer.from(supplied);
@@ -778,7 +784,7 @@ app.get('/api/monitoring/alerts', (req: Request, res: Response) => {
 
 // Acknowledge Alert
 app.post('/api/monitoring/alerts/:id/ack', (req: Request, res: Response) => {
-  const alert = acknowledgeAlert(req.params.id);
+  const alert = acknowledgeAlert(routeParam(req.params.id));
   if (!alert) {
     return res.status(404).json({ success: false, error: 'Alert not found' });
   }
@@ -787,7 +793,7 @@ app.post('/api/monitoring/alerts/:id/ack', (req: Request, res: Response) => {
 
 // Resolve Alert
 app.post('/api/monitoring/alerts/:id/resolve', (req: Request, res: Response) => {
-  const alert = resolveAlert(req.params.id);
+  const alert = resolveAlert(routeParam(req.params.id));
   if (!alert) {
     return res.status(404).json({ success: false, error: 'Alert not found' });
   }
@@ -816,7 +822,7 @@ app.get('/api/system/errors', (req: Request, res: Response) => {
 
 // Resolve a recorded global error
 app.post('/api/system/errors/:id/resolve', (req: Request, res: Response) => {
-  const success = resolveGlobalError(req.params.id);
+  const success = resolveGlobalError(routeParam(req.params.id));
   if (!success) {
     return res.status(404).json({ success: false, error: 'Error record not found' });
   }
@@ -1192,7 +1198,7 @@ app.get('/api/feature-flags', (req: Request, res: Response) => {
 
 // Toggle feature flag
 app.patch('/api/feature-flags/:key/toggle', (req: Request, res: Response) => {
-  const updated = toggleFeatureFlag(req.params.key);
+  const updated = toggleFeatureFlag(routeParam(req.params.key));
   if (!updated) {
     return res.status(404).json({ success: false, error: 'Feature flag not found' });
   }
@@ -1201,7 +1207,7 @@ app.patch('/api/feature-flags/:key/toggle', (req: Request, res: Response) => {
 
 // Update feature flag details
 app.patch('/api/feature-flags/:key', (req: Request, res: Response) => {
-  const updated = updateFeatureFlag(req.params.key, req.body);
+  const updated = updateFeatureFlag(routeParam(req.params.key), req.body);
   if (!updated) {
     return res.status(404).json({ success: false, error: 'Feature flag not found' });
   }
@@ -1229,7 +1235,7 @@ app.post('/api/feature-flags', (req: Request, res: Response) => {
 
 // Delete feature flag
 app.delete('/api/feature-flags/:key', (req: Request, res: Response) => {
-  const success = deleteFeatureFlag(req.params.key);
+  const success = deleteFeatureFlag(routeParam(req.params.key));
   return res.status(200).json({ success });
 });
 

@@ -56,7 +56,8 @@
       "threshold": 350,
       "unit": "ms",
       "triggeredAt": "2026-09-30T12:39:09.189Z",
-      "status": "active"
+      "status": "resolved",
+      "resolvedAt": "2026-10-21T18:05:53.512Z"
     },
     {
       "id": "alert-1790771949187-be3q",
@@ -68,7 +69,8 @@
       "threshold": 350,
       "unit": "ms",
       "triggeredAt": "2026-09-30T12:39:09.187Z",
-      "status": "active"
+      "status": "resolved",
+      "resolvedAt": "2026-10-21T18:06:08.557Z"
     },
     {
       "id": "alt-baseline-01",
