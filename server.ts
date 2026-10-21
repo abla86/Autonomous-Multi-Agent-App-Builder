@@ -2307,7 +2307,7 @@ app.get('/api/projects/:id/export', (req: Request, res: Response) => {
 });
 
 // Ensure unmatched /api routes return JSON 404, never index.html!
-app.all('/api/*', (req: Request, res: Response) => {
+app.all('/api/{*splat}', (req: Request, res: Response) => {
   res.status(404).json({ success: false, error: `API route ${req.method} ${req.path} not found` });
 });
 
@@ -2348,7 +2348,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('/{*splat}', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
