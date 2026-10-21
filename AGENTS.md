@@ -17,5 +17,10 @@
 - `curl http://localhost:3000/` → HTML with Vite client + React refresh scripts (live source, not prebuilt)
 - `docker compose -f docker-compose.base44.yml ps` → container status `Up (healthy)`
 
+## Tests
+- Runner: **Vitest** with the **jsdom** environment (`vitest.config.ts`, `vitest.setup.ts`).
+- `bun run test` (or `./node_modules/.bin/vitest run` inside the container).
+- jsdom's `Blob`/`File` omit `arrayBuffer()`/`text()`, which `fileConverters` relies on — `vitest.setup.ts` polyfills them via `FileReader`. Needed for any test that reads uploads.
+
 ## Secrets
 - `GEMINI_API_KEY` — Google Gemini API key (optional). Add via the Secrets page to enable AI features.
