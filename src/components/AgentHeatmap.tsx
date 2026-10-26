@@ -62,17 +62,25 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
     return selectedCategory === 'all' || a.category === selectedCategory;
   });
 
-  // Calculate cell value based on current metric
+  // Calculate cell value from recorded results only; never fabricate a baseline.
   const getCellData = (agent: AgentDefinition, target: { id: string; path: string; name: string }): CellData => {
     const res = lastResults ? lastResults[agent.id] : null;
-
-    // Deterministic synthetic baseline based on agent mandate relevance to file
-    const isTargetFile = target.path.includes('.tsx') || target.path.includes('.ts');
-    const isRelevantToAgent =
-      (agent.category === 'core' && (target.name.includes('App') || target.name.includes('server') || target.name.includes('storage'))) ||
-      (agent.category === 'quality' && (target.name.includes('Test') || target.path.includes('QA'))) ||
-      (agent.category === 'infrastructure' && (target.name.includes('server') || target.path.includes('Security') || target.name.includes('metrics'))) ||
-      (agent.category === 'product' && (target.name.includes('App') || target.path.includes('API')));
+    if (!res) {
+      return {
+        agent,
+        targetFile: target.path,
+        targetName: target.name,
+        value: 0,
+        label: '—',
+        level: 'none',
+        details: {
+          findings: ['No run result recorded; this cell has not been assessed.'],
+          repairs: [],
+          durationMs: 0,
+          status: 'not_run',
+        },
+      };
+    }
 
     let value = 0;
     let label = '';
