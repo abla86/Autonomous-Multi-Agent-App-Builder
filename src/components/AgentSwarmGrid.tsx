@@ -199,7 +199,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
       });
       return nextQueues;
     });
-    showToast(`⚡ All 20 agents' task queues automatically re-ordered by priority.`);
+    showToast(`⚡ All 20 role planning lists reordered by priority.`);
   };
 
   const filteredAgents = AGENT_REGISTRY.filter((agent) => {
@@ -513,7 +513,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                 <span>Local Role Planning Lists</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Adjust the execution sequence of pending tasks across all 20 agents. During a live swarm run, tasks at the top are dispatched immediately.
+                Reorder task descriptions for planning purposes. These entries are not dispatched and do not change the static inspection.
               </p>
             </div>
 
@@ -774,7 +774,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                       </span>
                       <span className="text-[11px] text-slate-400">
                         {isRunningSwarm
-                          ? 'Swarm is running. Moving a task to #1 adjusts the immediate worker payload.'
+                          ? 'The inspection is running. Reordering this list does not affect it.'
                           : 'Re-order tasks with Up/Down buttons or set priority pills (P0-P3).'}
                       </span>
                     </div>
@@ -931,7 +931,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-                      Latest Autonomous Run Findings
+                      Latest Static Inspection Result
                     </span>
                     <span className="text-xs text-emerald-400 font-medium">
                       Verified in {lastResults[inspectingAgent.id].durationMs}ms
@@ -956,7 +956,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                     </div>
 
                     <div>
-                      <span className="text-[11px] font-mono text-slate-400 block mb-1">Repairs / Protections Applied:</span>
+                      <span className="text-[11px] font-mono text-slate-400 block mb-1">Repairs reported by inspection:</span>
                       <ul className="space-y-1">
                         {lastResults[inspectingAgent.id].repairsApplied.map((r, i) => (
                           <li key={i} className="text-xs text-indigo-300 flex items-center space-x-1.5">
