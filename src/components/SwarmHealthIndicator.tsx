@@ -157,7 +157,7 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
     const overallScore = Math.min(100, Math.max(0, Math.round(totalScoreSum / totalAgents)));
 
     let statusGrade: SwarmHealthScore['statusGrade'] = 'optimal';
-    let statusLabel = 'Optimal · Production-Ready';
+    let statusLabel = 'Inspection summary only';
     if (overallScore < 50) {
       statusGrade = 'critical';
       statusLabel = 'Critical · Attention Required';
@@ -238,13 +238,13 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
     const dateStr = new Date().toLocaleString();
 
     let report = `${divider}\n`;
-    report += `SWARM HEALTH AUDIT REPORT · MASTER ORCHESTRATOR TELEMETRY\n`;
+    report += `STATIC INSPECTION SUMMARY · HEURISTIC ROLE REPORTS\n`;
     report += `${divider}\n`;
     report += `Timestamp:       ${dateStr}\n`;
     report += `Project Name:    ${project.name} (ID: ${project.id})\n`;
     report += `Status:          ${project.status.toUpperCase()}\n`;
     report += `Overall Health:  ${healthData.overallScore}% (${healthData.statusLabel})\n`;
-    report += `Total Agents:    ${healthData.summary.totalAgents} Autonomous Agents\n`;
+    report += `Defined Roles:   ${healthData.summary.totalAgents} (not independent workers)\n`;
     report += `Breakdown:       Passed: ${healthData.summary.passed} | Repaired: ${healthData.summary.fixed} | Warnings: ${healthData.summary.warnings} | Errors: ${healthData.summary.errors}\n`;
     report += `Invariants:      ${healthData.summary.totalRepairs} repairs applied · ${healthData.summary.totalFindings} findings tracked\n\n`;
 
@@ -275,7 +275,7 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
     });
 
     report += `\n${divider}\n`;
-    report += `END OF AUDIT REPORT · CERTIFIED BY AUTONOMOUS SWARM SENTINEL\n`;
+    report += `END OF SUMMARY · NOT A SECURITY OR PRODUCTION CERTIFICATION\n`;
     report += `${divider}\n`;
 
     return report;
@@ -420,14 +420,14 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-sm font-bold text-white tracking-tight">Swarm Health Sentinel</h2>
+              <h2 className="text-sm font-bold text-white tracking-tight">Inspection Summary (Heuristic)</h2>
               <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-semibold flex items-center space-x-1.5 ${gradeStyles.bg} ${gradeStyles.text} ${gradeStyles.border}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${gradeStyles.pulse} ${isRunningSwarm ? 'animate-ping' : ''}`}></span>
                 <span>{healthData.statusLabel.toUpperCase()}</span>
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              Aggregated operational health telemetry computed across all 20 autonomous agent workers.
+              Heuristic summary of recorded role-level results. It is not an application health check, and the 20 roles are not independent workers.
             </p>
           </div>
         </div>
@@ -505,7 +505,7 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
             title={isExpanded ? 'Collapse 20-agent health list' : 'Expand 20-agent health breakdown'}
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>{isExpanded ? 'Hide Agents' : 'All 20 Agents'}</span>
+            <span>{isExpanded ? 'Hide Agents' : 'All 20 Roles'}</span>
             {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
         </div>
@@ -567,7 +567,7 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
               <span>{healthData.statusLabel}</span>
             </div>
             <p className="text-[11px] text-slate-500 font-mono">
-              Aggregated from 20 specialized agent worker threads
+              Derived from recorded role reports; roles are not independent worker threads.
             </p>
           </div>
 
@@ -699,10 +699,10 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
         <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 animate-in fade-in">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="text-xs font-bold font-mono text-white uppercase tracking-wider">
-              20 Autonomous Agent Health Invariant Registry
+              20 Defined Role Status Summary
             </span>
             <span className="text-[11px] font-mono text-indigo-400">
-              Aggregated Mean: {healthData.overallScore}%
+              Heuristic index: {healthData.overallScore}%
             </span>
           </div>
 
