@@ -49,9 +49,9 @@ The following table documents intended role responsibilities, not proof that eac
 
 ---
 
-## ⚡ Real-Time System Performance Sentinel & Canvas Telemetry
+## ⚡ Server Process Metrics and Canvas Charts
 
-Located directly in the **20-Agent Swarm** tab, the real-time performance sentinel monitors process-level metrics with hardware-accelerated canvas sparklines:
+Located directly in the **20-Agent Swarm** tab, the dashboard displays process-level metrics with hardware-accelerated canvas sparklines:
 
 - **Dual Canvas Sparkline Charts**: High-performance HTML5 Canvas sparklines (powered by Chart.js) rendering:
   - **CPU Utilization Sparkline**: Instantaneous and rolling CPU percent with smooth bezier interpolation, gradient fills, and peak tracking.
@@ -66,7 +66,7 @@ Located directly in the **20-Agent Swarm** tab, the real-time performance sentin
   - Peak CPU spike (%) and minimum CPU recorded across the session.
   - Session-wide average CPU utilization.
   - Peak heap memory allocation vs initial heap at boot.
-  - Total V8 memory flushes and total completed swarm cycles.
+  - Recorded garbage-collection events and inspection runs, where available.
   - Historical filtering: "All Session", "Last 5m", "Last 15m", and "Swarm Runs Only".
 - **Interactive Controls**:
   - Live Stream Pause / Resume toggle.
