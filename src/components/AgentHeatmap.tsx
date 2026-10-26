@@ -78,22 +78,16 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
     let label = '';
     let level: 'none' | 'low' | 'medium' | 'high' | 'critical' = 'none';
 
-    const baseFindings = res?.findings || [
-      `Contract verified on ${target.name}`,
-      `Zero blocking violations detected in AST`,
-    ];
-    const baseRepairs = res?.repairsApplied || [
-      `Normalized defensive invariants for ${target.name}`,
-    ];
-    const durationMs = res?.durationMs || (20 + (agent.index * 7) % 45);
-    const status = res?.status || 'passed';
+    const baseFindings = res?.findings || ['No result recorded for this agent; no finding has been verified.'];
+    const baseRepairs = res?.repairsApplied || [];
+    const durationMs = res?.durationMs || 0;
+    const status = res?.status || 'warning';
 
     if (metric === 'operations') {
       // Metric: Operations & Invariant Repairs
       const repairsCount = res?.repairsApplied.length || 0;
       const findingsCount = res?.findings.length || 0;
-      const baseOps = isRelevantToAgent ? 3 + (agent.index % 4) : 1;
-      value = (res ? repairsCount * 2 + findingsCount : baseOps);
+      value = res ? repairsCount * 2 + findingsCount : 0;
 
       label = `${value} ops`;
       if (value > 6) level = 'critical';
@@ -113,7 +107,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
 
     } else if (metric === 'findings') {
       // Metric: Findings & Warnings
-      const findingsCount = res?.findings.length || (isRelevantToAgent ? 2 : 1);
+      const findingsCount = res?.findings.length || 0;
       const isWarn = status === 'warning';
       value = isWarn ? findingsCount + 3 : findingsCount;
       label = `${value} findings`;
@@ -174,12 +168,10 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
 
   // Aggregated Bottlenecks
   const resultsList: AgentResult[] = lastResults ? (Object.values(lastResults) as AgentResult[]) : [];
-  const activeRepairsCount: number = resultsList.length > 0
-    ? resultsList.reduce((acc: number, r: AgentResult) => acc + (r.repairsApplied ? r.repairsApplied.length : 0), 0)
-    : 14;
-  const avgLatency: number = resultsList.length > 0
+  const activeRepairsCount: number = resultsList.reduce((acc: number, r: AgentResult) => acc + (r.repairsApplied ? r.repairsApplied.length : 0), 0);
+  const avgLatency: number | null = resultsList.length > 0
     ? Math.round(resultsList.reduce((acc: number, r: AgentResult) => acc + (r.durationMs || 0), 0) / resultsList.length)
-    : 48;
+    : null;
 
   return (
     <div id="agent-heatmap-container" className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-5">
