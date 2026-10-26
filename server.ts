@@ -202,7 +202,7 @@ interface DBStructure {
 }
 
 function getInitialDB(): DBStructure {
-  return {
+  const initial: DBStructure = {
     projects: [
       {
         id: 'proj-swarm-core',
@@ -393,6 +393,20 @@ export function scanHeaders(headers: Record<string, string>): VulnerabilityCheck
     auditLogs: [],
     lastSwarmRuns: {},
   };
+  // Seed projects are examples, not verified production artifacts. Derive file counts
+  // from stored data and never seed passing tests or security grades.
+  for (const project of initial.projects) {
+    project.status = 'draft';
+    project.healthScore = 0;
+    project.stats = {
+      ...project.stats,
+      linesOfCode: (project.files || []).reduce((total: number, file: any) => total + (typeof file.content === 'string' ? file.content.split(/\r?\n/).length : 0), 0),
+      filesCount: (project.files || []).length,
+      testsPassed: 0,
+      securityGrade: 'Unverified',
+    };
+  }
+  return initial;
 }
 
 function readDB(): DBStructure {
@@ -464,12 +478,12 @@ const initialMem = process.memoryUsage();
 const swarmTelemetry: TelemetryStats = {
   isSwarmActive: false,
   activeWorkers: 0,
-  totalCycles: 1,
-  totalTasksCompleted: 20,
-  avgCycleDurationMs: 82,
+  totalCycles: 0,
+  totalTasksCompleted: 0,
+  avgCycleDurationMs: 0,
   peakMemoryMb: Math.round((initialMem.rss / 1024 / 1024) * 100) / 100,
-  totalAssertionsVerified: 16,
-  cycleDurations: [82],
+  totalAssertionsVerified: 0,
+  cycleDurations: [],
 };
 
 interface PerformanceHistoryPoint {
@@ -978,7 +992,7 @@ app.get('/api/system/status', (req: Request, res: Response) => {
     aiEngineAvailable: Boolean(process.env.GEMINI_API_KEY),
     aiModel: 'gemini-3.8-flash',
     totalProjects: db.projects.length,
-    activeAgentsPool: 20,
+    activeAgentsPool: 0,
     timestamp: new Date().toISOString(),
   });
 });
@@ -1026,10 +1040,10 @@ app.post('/api/projects', (req: Request, res: Response) => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     stats: {
-      linesOfCode: 120,
+      linesOfCode: 0,
       filesCount: 2,
       testsPassed: 0,
-      securityGrade: 'A',
+      securityGrade: 'Unverified',
     },
     files: [
       {
@@ -1038,7 +1052,7 @@ app.post('/api/projects', (req: Request, res: Response) => {
         path: '/src/App.tsx',
         language: 'typescript',
         updatedAt: new Date().toISOString(),
-        content: `export default function App() {\n  return (\n    <main className="p-6 max-w-4xl mx-auto">\n      <h1 className="text-2xl font-bold text-slate-900">${name}</h1>\n      <p className="text-slate-600 mt-2">Built autonomously with the 20-agent swarm.</p>\n    </main>\n  );\n}`,
+        content: `export default function App() {\n  return (\n    <main className="p-6 max-w-4xl mx-auto">\n      <h1 className="text-2xl font-bold text-slate-900">${name}</h1>\n      <p className="text-slate-600 mt-2">Created from the project scaffold.</p>\n    </main>\n  );\n}`,
       },
       {
         id: newId('file'),
@@ -1051,6 +1065,11 @@ app.post('/api/projects', (req: Request, res: Response) => {
     ],
   };
 
+  newProject.stats.linesOfCode = newProject.files.reduce((total: number, file: any) => total + file.content.split(/\r?\n/).length, 0);
+  newProject.stats.filesCount = newProject.files.length;
+  newProject.stats.testsPassed = 0;
+  newProject.stats.securityGrade = 'Unverified';
+  newProject.healthScore = 0;
   db.projects.unshift(newProject);
   writeDB(db);
 
