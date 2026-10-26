@@ -497,7 +497,7 @@ const sessionEvents: SessionEvent[] = [
     timestamp: sessionStartTime,
     type: 'session_start',
     label: 'Swarm Session Inception',
-    details: 'Master orchestrator and 20 specialized agent worker threads initialized.',
+    details: 'Static inspection engine initialized. The 20 agent roles are descriptive and are not separate worker threads.',
   },
 ];
 const MAX_HISTORY_POINTS = 60;
@@ -1497,23 +1497,14 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
   }
 
   // Checkpoint pre-merge snapshot
-  const preSwarmSnapshot = createSnapshot(
-    project.id,
-    `Pre-Swarm run checkpoint (${new Date().toLocaleTimeString()})`,
-    'agent_pre_merge',
-    'MASTER_ORCHESTRATOR',
-    project.files
-  );
-
-
   swarmTelemetry.isSwarmActive = true;
-  swarmTelemetry.activeWorkers = 20;
+  swarmTelemetry.activeWorkers = 0;
   sessionEvents.push({
     id: newId('evt'),
     timestamp: new Date().toISOString(),
     type: 'swarm_start',
     label: `Swarm Orchestration Triggered: ${project.name}`,
-    details: `Simulation only: generated predefined reports for 20 roles across ${project.files.length} stored file records; no agents or project code were executed.`,
+    details: `Static source inspection started for ${project.files.length} stored file record(s). No project code will be executed or modified.`,
   });
 
   const startTime = Date.now();
@@ -1529,8 +1520,8 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     });
   };
 
-  addLog('MASTER_ORCHESTRATOR', 'warn', 'SIMULATION ONLY: generating predefined role reports; no autonomous agent execution or source-code repair occurs in this route.');
-  addLog('MASTER_ORCHESTRATOR', 'warn', `Stored project metadata referenced for ${project.name} (${project.files.length} files); this route does not parse or execute the repository.`);
+  addLog('MASTER_ORCHESTRATOR', 'info', 'Starting bounded static source inspection; no autonomous agent execution or source-code repair occurs in this route.');
+  addLog('MASTER_ORCHESTRATOR', 'info', `Inspecting stored source text for ${project.name} (${project.files.length} files); the repository is not executed.`);
 
   // 1. Codebase Analyst
   results['AGENT_1_ANALYST'] = {
@@ -1827,6 +1818,7 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
 
   // Perform real, bounded source-text checks over the stored project files.
   // This is static analysis only: it does not execute agents, build the project, or apply repairs.
+  logs.length = 0;
   const storedFiles = Array.isArray(project.files) ? project.files : [];
   const findingsByAgent: Record<string, string[]> = {};
   const unverifiedRoles = new Set([
@@ -1922,7 +1914,7 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     details: 'Static source inspection completed. No source files were modified; runtime/build checks remain unverified.',
   });
 
-  addLog('AGENT_20_QA', 'success', 'All 20 agents reported green. Swarm run completed successfully.');
+  addLog('AGENT_20_QA', 'warn', 'Static checks completed; required build, runtime, dependency and E2E verification remains outstanding.');
   addLog('MASTER_ORCHESTRATOR', 'info', `Static source inspection completed in ${executionDuration}ms; no code repairs were applied.`);
 
   project.status = 'draft';
@@ -1934,39 +1926,7 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     logs,
   };
 
-  // Automated Test Guard check post-swarm
-  const testEval = evaluateCriticalTests(project);
-  const rollbackConfig = getRollbackConfig();
-  const autoRollbackActive =
-    isFeatureEnabled('auto_rollback_on_test_failure', true) && rollbackConfig.autoRollbackEnabled;
-
-  if (!testEval.allPassed && autoRollbackActive) {
-    const rbResult = executeRollback(
-      project.id,
-      preSwarmSnapshot.id,
-      `Critical tests failed post-swarm: ${testEval.failedTests.map((t) => t.name).join(', ')}`,
-      testEval.failedTests,
-      'AGENT_18_RECOVERY',
-      true
-    );
-    project.files = rbResult.restoredFiles;
-    project.stats.filesCount = project.files.length;
-    project.updatedAt = new Date().toISOString();
-    addLog(
-      'AGENT_18_RECOVERY',
-      'warn',
-      `[AUTOMATED ROLLBACK ACTIVATED] Project reverted to snapshot ${preSwarmSnapshot.id} due to ${testEval.failedTests.length} critical test failures.`
-    );
-  } else {
-    createSnapshot(
-      project.id,
-      `Post-Swarm verified baseline (${new Date().toLocaleTimeString()})`,
-      'agent_post_merge',
-      'AGENT_20_QA',
-      project.files
-    );
-  }
-
+  // This inspection does not change source files, so rollback and merge snapshots are not applicable.
   writeDB(db);
 
 
