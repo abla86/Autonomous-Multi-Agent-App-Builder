@@ -15,6 +15,7 @@ Current implementation:
 - Heuristic source scanner for selected secret, dynamic-code, HTML-rendering, and shell-execution patterns. It is not a complete OWASP audit and does not inspect dependency advisories or runtime data flow.
 - Server-side Gemini consultation when `GEMINI_API_KEY` is configured. The AI endpoint returns suggestions; it does not automatically apply, build, or verify code changes.
 - A deployment gate that deliberately blocks readiness while required build, dependency, runtime-security, and browser E2E evidence is unavailable.
+- The role registry and task queues are UI/planning features, not a worker scheduler. The health index is a heuristic summary of recorded role reports, not an application-health score. The rollback screen is a policy simulator; it does not automatically revert real repository changes.
 
 Do not treat a green project-integrity check, a clean heuristic scan, or a successful server build as proof that a generated application is production-ready.
 
