@@ -34,18 +34,18 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
 
   return (
     <div className="space-y-6">
-      {/* Top Banner with Production Certificate */}
+      {/* Evidence-based deployment gate status */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className={`w-12 h-12 rounded-xl border flex items-center justify-center ${readyForDeploy ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-amber-500/10 border-amber-500/30 text-amber-400"}`}>
               <ShieldCheck className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-base font-bold text-white">Agent 20 Final QA & Production Gate</h2>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold">
-                  {readyForDeploy ? 'READY' : checks.length ? 'BLOCKED / INCOMPLETE' : 'CHECKING'}
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${readyForDeploy ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                  {readyForDeploy ? 'READY' : checks.length ? 'BLOCKED / INCOMPLETE' : isLoading ? 'CHECKING' : 'UNAVAILABLE'}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
