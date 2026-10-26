@@ -60,7 +60,7 @@ export default function App() {
       }
       setSystemStatus(sys);
     } catch (err: any) {
-      console.error('Failed to initialize swarm engine:', err);
+      console.error('Failed to initialize application:', err);
       setErrorNotice(err.message || 'Could not connect to backend server');
     } finally {
       setIsLoading(false);
@@ -77,7 +77,7 @@ export default function App() {
     clientLogger.userAction('USER_NAVIGATION', `Navigated to ${tab} tab`, { tab });
   };
 
-  // Run Autonomous Swarm
+  // Run the implemented static source inspection
   const handleRunSwarm = async () => {
     if (!selectedProject) return;
     setIsRunningSwarm(true);
@@ -86,7 +86,7 @@ export default function App() {
         timestamp: new Date().toISOString(),
         agentId: 'AGENT_1_ANALYST',
         level: 'info',
-        message: 'Master Orchestrator dispatched all 20 agents.',
+        message: 'Started bounded static source inspection; defined roles are not independently executed.',
       },
     ]);
 
@@ -99,14 +99,14 @@ export default function App() {
       // Update in projects array
       setProjects((prev) => prev.map((p) => (p.id === res.project.id ? res.project : p)));
     } catch (err: any) {
-      console.error('Swarm execution failure:', err);
+      console.error('Static inspection failed:', err);
       setSwarmLogs((prev) => [
         ...prev,
         {
           timestamp: new Date().toISOString(),
           agentId: 'AGENT_18_RECOVERY',
           level: 'error',
-          message: `Swarm halted with error: ${err.message || 'Unknown exception'}`,
+          message: `Static inspection failed: ${err.message || 'Unknown exception'}`,
         },
       ]);
     } finally {
@@ -180,7 +180,7 @@ export default function App() {
         <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 animate-pulse">
           <Bot className="w-6 h-6" />
         </div>
-        <p className="text-sm font-mono text-slate-400">Initializing 20-Agent Autonomous Swarm Engine...</p>
+        <p className="text-sm font-mono text-slate-400">Loading project dashboard...</p>
       </div>
     );
   }
@@ -314,7 +314,7 @@ export default function App() {
               <Bot className="w-12 h-12 text-slate-600 mx-auto" />
               <h3 className="text-base font-semibold text-slate-300">No Projects Configured</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Initialize a new autonomous application scaffold to start the 20-agent engineering loop.
+                Create a project record to inspect its stored files. The current inspection does not autonomously build or repair applications.
               </p>
               <button
                 onClick={() => setShowNewModal(true)}
