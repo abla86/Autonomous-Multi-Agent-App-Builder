@@ -22,7 +22,9 @@ Do not treat a green project-integrity check, a clean heuristic scan, or a succe
 
 ## 🤖 The 20 Defined Agent Roles
 
-| # | Badge | Agent Name | Category | Operational Mandate |
+The following table documents intended role responsibilities, not proof that each capability is implemented. The current swarm endpoint performs a limited static inspection and returns role-grouped findings; the other responsibilities remain planned or unverified.
+
+| # | Badge | Agent Name | Category | Defined Responsibility |
 |---|---|---|---|---|
 | **01** | `ANL-01` | **Codebase Analyst** | Core | Project/file metadata checks and selected source-pattern inspection |
 | **02** | `FNT-02` | **Frontend Architect** | Core | Limited frontend file and selected markup-pattern checks |
