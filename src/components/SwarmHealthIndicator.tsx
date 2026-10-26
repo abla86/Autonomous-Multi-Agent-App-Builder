@@ -65,6 +65,7 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
   // Aggregate individual agent data into single 0-100% health score
   const healthData: SwarmHealthScore = useMemo(() => {
     let totalScoreSum = 0;
+    let assessedCount = 0;
     let totalAgents = AGENT_REGISTRY.length;
     let passedCount = 0;
     let fixedCount = 0;
@@ -127,21 +128,17 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
         // Penalty for residual findings and bonus for confirmed repairs
         agentScore = Math.max(20, Math.min(100, agentScore - findingsNum * 2 + repairsNum * 1.5));
       } else {
-        // Baseline estimation prior to first swarm run
-        const baseProjectScore = project.healthScore || 90;
-        // Minor dynamic jitter based on file integrity and role
-        const offset = (agent.index * 3) % 7;
-        agentScore = Math.max(70, Math.min(100, baseProjectScore - 3 + offset));
-        statusStr = 'passed';
-        passedCount++;
-        categoryStats[agent.category].passed++;
+        agentScore = 0;
+        statusStr = 'not assessed';
       }
 
       agentScore = Math.round(agentScore);
-      totalScoreSum += agentScore;
-
-      categoryStats[agent.category].sum += agentScore;
-      categoryStats[agent.category].count += 1;
+      if (res) {
+        assessedCount++;
+        totalScoreSum += agentScore;
+        categoryStats[agent.category].sum += agentScore;
+        categoryStats[agent.category].count += 1;
+      }
 
       agentScores[agent.id] = {
         agentId: agent.id,
@@ -154,17 +151,17 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
       };
     });
 
-    const overallScore = Math.min(100, Math.max(0, Math.round(totalScoreSum / totalAgents)));
+    const overallScore = assessedCount > 0 ? Math.min(100, Math.max(0, Math.round(totalScoreSum / assessedCount))) : 0;
 
     let statusGrade: SwarmHealthScore['statusGrade'] = 'optimal';
-    let statusLabel = 'Inspection summary only';
-    if (overallScore < 50) {
+    let statusLabel = assessedCount > 0 ? 'Heuristic inspection index · not production readiness' : 'Not assessed · no inspection results';
+    if (assessedCount > 0 && overallScore < 50) {
       statusGrade = 'critical';
       statusLabel = 'Critical · Attention Required';
-    } else if (overallScore < 75) {
+    } else if (assessedCount > 0 && overallScore < 75) {
       statusGrade = 'degraded';
       statusLabel = 'Degraded · Invariants Failing';
-    } else if (overallScore < 90) {
+    } else if (assessedCount > 0 && overallScore < 90) {
       statusGrade = 'stable';
       statusLabel = 'Stable · Minor Warnings';
     }
