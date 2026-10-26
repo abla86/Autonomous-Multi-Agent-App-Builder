@@ -29,16 +29,15 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
   }, [logs]);
 
   const phases = [
-    { id: 'scan', label: '1. SCAN', desc: 'AST & Structure Inspection' },
-    { id: 'diagnose', label: '2. DIAGNOSE', desc: 'Dependency & Defect Audit' },
-    { id: 'parallel', label: '3. PARALLEL WORK', desc: 'Frontend, Backend, DB & Security' },
-    { id: 'integrate', label: '4. INTEGRATE', desc: 'Merge & Conflict Prevention' },
-    { id: 'test', label: '5. TEST', desc: 'Unit, Integration & E2E Journey' },
-    { id: 'qa', label: '6. FINAL QA', desc: 'Production Gate Verification' },
+    { id: 'scan', label: '1. FILES', desc: 'Stored file metadata and structure' },
+    { id: 'diagnose', label: '2. SOURCE', desc: 'Selected text-pattern checks' },
+    { id: 'parallel', label: '3. INTEGRITY', desc: 'Duplicate IDs, paths and descriptors' },
+    { id: 'integrate', label: '4. TEST EVIDENCE', desc: 'Check whether test files are present' },
+    { id: 'test', label: '5. DOCUMENTATION', desc: 'Check README presence' },
+    { id: 'qa', label: '6. LIMITATIONS', desc: 'Build, runtime and E2E remain unverified' },
   ];
 
-  const hasVerifiedResults = Boolean(results && Object.values(results).some((result) => result.status === 'passed' || result.status === 'fixed'));
-  const currentPhaseIndex = isRunning ? 3 : hasVerifiedResults ? 5 : 0;
+  const currentPhaseIndex = isRunning ? 0 : -1;
 
   const filteredLogs = logs.filter((log) => {
     if (activeFilter === 'errors') return log.level === 'error' || log.level === 'warn';
@@ -97,7 +96,7 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
         {/* Phase Stepper */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mt-6 pt-5 border-t border-slate-800">
           {phases.map((p, idx) => {
-            const isCompleted = idx < currentPhaseIndex || (!isRunning && hasVerifiedResults);
+            const isCompleted = isRunning && idx < currentPhaseIndex;
             const isCurrent = isRunning && idx === currentPhaseIndex;
 
             return (
