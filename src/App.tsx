@@ -200,6 +200,12 @@ export default function App() {
         setActiveTab={handleTabChange}
       />
 
+      <div role="note" aria-label="Prototype limitations" className="w-full border-b border-amber-500/30 bg-amber-950/30 px-4 py-2 text-xs text-amber-100">
+        <div className="mx-auto max-w-7xl">
+          <strong>Prototype — not production certification.</strong> This app runs limited source-pattern and project-integrity checks. The 20 role entries are not independent agents; AI output is advisory; generated apps are not built or browser-tested here; the security scan is not a full audit; rollback automation for real repository changes is not implemented. Review results and verify changes independently before use or deployment.
+        </div>
+      </div>
+
       {/* Main Content Area Protected by Global Error Boundary */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <ErrorBoundary>
