@@ -33,7 +33,7 @@ export const TestStudio: React.FC<TestStudioProps> = ({
             </div>
             <p className="text-xs text-slate-400 mt-1">
               Automated regression suite executing genuine assertions. Strict mandate:
-              <strong className="text-slate-300"> Zero mock bypass · No fake success · Zero disabled tests</strong>.
+              <strong className="text-slate-300"> Checks cover stored project metadata and persistence only</strong>.
             </p>
           </div>
 
@@ -65,7 +65,7 @@ export const TestStudio: React.FC<TestStudioProps> = ({
               {isRunningTests ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Executing Tests...</span>
+                  <span>Checking project integrity...</span>
                 </>
               ) : (
                 <>
@@ -107,7 +107,7 @@ export const TestStudio: React.FC<TestStudioProps> = ({
         <div className="divide-y divide-slate-800/80">
           {filteredTests.length === 0 ? (
             <div className="p-8 text-center text-slate-500 text-xs">
-              No test run recorded yet. Click "Execute Full Test Suite" above to launch tests.
+              No integrity check recorded yet. Running this check does not execute the generated application's unit, integration, or browser tests.
             </div>
           ) : (
             filteredTests.map((test) => (
