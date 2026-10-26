@@ -171,7 +171,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
                         : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
                     }`}
                   >
-                    {config.autoRollbackEnabled ? 'ACTIVE & GUARDED' : 'DISABLED'}
+                    {config.autoRollbackEnabled ? 'SIMULATION ENABLED' : 'DISABLED'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
@@ -204,7 +204,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
           <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5">
             <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Rollback Actions</span>
             <span className="text-2xl font-bold text-amber-400 font-mono">{rollbackLogs.length}</span>
-            <span className="text-[11px] text-slate-500 block mt-0.5">Automated reverts logged</span>
+            <span className="text-[11px] text-slate-500 block mt-0.5">Simulated reverts logged</span>
           </div>
 
           <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5">
@@ -231,7 +231,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
             <div className="flex items-center space-x-2 pb-3 border-b border-slate-800">
               <Sliders className="w-4 h-4 text-indigo-400" />
-              <h3 className="text-sm font-semibold text-white">Automated Rollback Policies</h3>
+              <h3 className="text-sm font-semibold text-white">Rollback Policy Simulation Settings</h3>
             </div>
 
             <div className="space-y-3">
@@ -325,7 +325,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
               <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
                 <div className="space-y-0.5">
                   <span className="text-xs font-medium text-slate-200">Emit Rollback Audit Log & Reason</span>
-                  <span className="text-[11px] text-slate-500 block">Records timestamp, failure assertion, and reverted files</span>
+                  <span className="text-[11px] text-slate-500 block">Simulation logs record the selected scenario and simulated outcome</span>
                 </div>
                 <button
                   type="button"
@@ -432,14 +432,14 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
             <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 text-xs text-slate-400 space-y-2">
               <div className="flex items-center space-x-2 text-indigo-400 font-mono text-[11px]">
                 <Info className="w-3.5 h-3.5" />
-                <span>Automated Lifecycle Sequence:</span>
+                <span>Simulated Lifecycle Sequence:</span>
               </div>
               <ol className="list-decimal list-inside space-y-1 text-slate-300 pl-1 font-mono text-[11px]">
                 <li>Create pre-merge snapshot before agent commits code.</li>
                 <li>Apply agent's proposed files into virtual candidate repository.</li>
                 <li>Execute critical Unit, Integration, and E2E test suites in parallel.</li>
                 <li>
-                  <strong className="text-amber-400">If tests fail:</strong> Automated engine immediately reverts files back to pre-merge snapshot & logs failure reason.
+                  <strong className="text-amber-400">If tests fail:</strong> The simulation reports a revert to the example pre-merge snapshot and records the selected failure reason.
                 </li>
                 <li>
                   <strong className="text-emerald-400">If tests pass:</strong> Commit clean state and save post-merge verified snapshot.
@@ -498,7 +498,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
                         : 'bg-emerald-400/20 text-emerald-300'
                     }`}
                   >
-                    {simulationResult.rolledBack ? 'ROLLBACK EXECUTED' : 'MERGE SUCCESSFUL'}
+                    {simulationResult.rolledBack ? 'SIMULATED ROLLBACK' : 'SIMULATED MERGE'}
                   </span>
                 </div>
 
