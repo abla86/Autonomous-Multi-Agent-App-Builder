@@ -19,6 +19,17 @@ Current implementation:
 
 Do not treat a green project-integrity check, a clean heuristic scan, or a successful server build as proof that a generated application is production-ready.
 
+## User-facing disclaimers and data handling
+
+- **Prototype / no warranty:** This project is provided as a prototype. Results may be incomplete or incorrect. Independently review all generated suggestions, files, checks, and deployment decisions.
+- **AI output:** AI responses are advisory, may contain errors or insecure code, and are not automatically applied, built, or tested.
+- **External AI processing:** When Gemini is configured, prompts and the selected file's contents are sent to Google's Gemini service. Do not submit secrets, credentials, personal data, or confidential material unless authorized and the applicable data-handling terms have been reviewed.
+- **Security and testing scope:** Source-pattern checks and stored-project integrity assertions are limited checks, not a security certification, full vulnerability audit, or tests of the generated application's runtime behavior.
+- **Deployment:** Passing available checks does not guarantee safety, legal compliance, reliability, or production readiness. Missing evidence must be verified independently.
+- **Rollback:** The rollback screen simulates policy outcomes. It does not automatically undo real repository merges. Manual snapshot restore changes the stored project state and should be used only after reviewing the target snapshot.
+- **Telemetry and logs:** Do not assume logs are a complete audit trail or contain no sensitive information. Restrict access and configure retention appropriate to your deployment.
+
+
 ---
 
 ## 🤖 The 20 Defined Agent Roles
@@ -61,7 +72,7 @@ Located directly in the **20-Agent Swarm** tab, the dashboard displays process-l
 - **Session Historical Mode**: Toggle between:
   - **Live Rolling Window (60s)**: High-frequency real-time continuous stream with configurable sampling rate (1s, 2s, 5s).
   - **Session Historical Mode**: Comprehensive timeline tracking performance from session inception, capturing all lifecycle telemetry points.
-- **Session Lifecycle Milestones**: Highlights key events on the timeline (Session Inception, Swarm Orchestration Runs, V8 GC Flushes, Test Validations) with interactive inspection badges.
+- **Session Lifecycle Events**: Displays recorded application events where available. Event markers are not proof of autonomous agent execution or generated-app test runs.
 - **Session Performance Summary Dashboard**:
   - Session start timestamp and total elapsed runtime.
   - Peak CPU spike (%) and minimum CPU recorded across the session.
