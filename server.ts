@@ -209,15 +209,15 @@ function getInitialDB(): DBStructure {
         name: 'SwarmForge Autonomous Engine',
         description: 'Multi-agent distributed orchestration server with real-time state machines and fault-tolerant workers.',
         version: '1.4.0',
-        status: 'tested',
-        healthScore: 98,
+        status: 'draft',
+        healthScore: 0,
         createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
         updatedAt: new Date().toISOString(),
         stats: {
           linesOfCode: 1840,
           filesCount: 6,
-          testsPassed: 18,
-          securityGrade: 'A+',
+          testsPassed: 0,
+          securityGrade: 'Unverified',
         },
         files: [
           {
@@ -334,15 +334,15 @@ export class PersistentStore {
         name: 'CloudGuard Observability Dashboard',
         description: 'Microservice telemetry monitor with automated vulnerability detection and latency metrics.',
         version: '2.0.1',
-        status: 'production-ready',
-        healthScore: 95,
+        status: 'draft',
+        healthScore: 0,
         createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
         updatedAt: new Date().toISOString(),
         stats: {
           linesOfCode: 1220,
           filesCount: 4,
-          testsPassed: 14,
-          securityGrade: 'A',
+          testsPassed: 0,
+          securityGrade: 'Unverified',
         },
         files: [
           {
@@ -862,7 +862,7 @@ app.post('/api/system/simulate-error', (req: Request, res: Response, next: NextF
       id: 'proj-fallback-safe',
       name: 'Safe Fallback Cached Project',
       status: 'draft',
-      healthScore: 90,
+      healthScore: 0,
       files: [],
     };
 
@@ -1036,7 +1036,7 @@ app.post('/api/projects', (req: Request, res: Response) => {
     description: description || 'New autonomous application scaffold',
     version: '1.0.0',
     status: 'draft',
-    healthScore: 85,
+    healthScore: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     stats: {
