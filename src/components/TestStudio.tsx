@@ -29,7 +29,7 @@ export const TestStudio: React.FC<TestStudioProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <Activity className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-base font-bold text-white">Agent 11 & 12 Test Engineering Studio</h2>
+              <h2 className="text-base font-bold text-white">Project Integrity Checks</h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
               Automated regression suite executing genuine assertions. Strict mandate:
@@ -70,7 +70,7 @@ export const TestStudio: React.FC<TestStudioProps> = ({
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Execute Full Test Suite</span>
+                  <span>Execute Full Integrity Check Run</span>
                 </>
               )}
             </button>
