@@ -54,10 +54,10 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
-              <h2 className="text-lg font-bold text-white tracking-tight">Master Orchestrator Pipeline</h2>
+              <h2 className="text-lg font-bold text-white tracking-tight">Project Static Analysis</h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Active Project: <strong className="text-slate-200">{project.name}</strong> · Files: {project.files.length} · Status: <span className="uppercase text-indigo-400 font-mono">{project.status}</span>
+              Project: <strong className="text-slate-200">{project.name}</strong> · Files: {project.files.length} · Status: <span className="uppercase text-indigo-400 font-mono">{project.status}</span>
             </p>
           </div>
 
@@ -82,7 +82,7 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
               {isRunning ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Swarm Executing Cycle...</span>
+                  <span>Inspecting Source...</span>
                 </>
               ) : (
                 <>
