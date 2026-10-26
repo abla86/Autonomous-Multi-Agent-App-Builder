@@ -307,7 +307,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2.5">
-              <h2 className="text-base font-semibold text-white">Autonomous Multi-Agent Swarm Registry</h2>
+              <h2 className="text-base font-semibold text-white">Defined Role Registry</h2>
               <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">
                 20 SPECIALIZED ROLES
               </span>
@@ -510,7 +510,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
             <div>
               <h3 className="text-sm font-bold text-white flex items-center space-x-2">
                 <ListOrdered className="w-4 h-4 text-indigo-400" />
-                <span>Live Swarm Task Priority & Dispatch Queue</span>
+                <span>Local Role Planning Lists</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
                 Adjust the execution sequence of pending tasks across all 20 agents. During a live swarm run, tasks at the top are dispatched immediately.
