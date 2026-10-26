@@ -293,11 +293,11 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
           <div className="flex items-center space-x-2">
             <Flame className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <span className="font-semibold">
-              Live Swarm Execution In Progress: Real-time Task Re-ordering & Priority Shifting is ACTIVE!
+              Static inspection is running. The role task lists below are local planning UI only.
             </span>
           </div>
           <span className="text-[11px] font-mono bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30 text-amber-200">
-            Reorder tasks below to alter immediate agent execution order
+            Reorder the local planning list; changes do not affect the running inspection.
           </span>
         </div>
       )}
@@ -313,12 +313,12 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
               </span>
               {isRunningSwarm && (
                 <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono animate-pulse">
-                  PARALLEL WORKERS ACTIVE
+                  STATIC INSPECTION ACTIVE
                 </span>
               )}
             </div>
             <p className="text-xs text-slate-400 mt-1 max-w-3xl">
-              Coordinated by the Master Orchestrator. Inspect agents, re-order pending operational tasks, or adjust priority rankings dynamically during execution.
+              Browse the 20 defined role descriptions and reorder local planning lists. These queues are UI-only and are not dispatched to workers.
             </p>
           </div>
 
