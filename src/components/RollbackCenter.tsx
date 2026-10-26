@@ -163,7 +163,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h2 className="text-xl font-bold text-white tracking-tight">Automated Rollback Strategy Engine</h2>
+                  <h2 className="text-xl font-bold text-white tracking-tight">Rollback Policy Simulator</h2>
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold ${
                       config.autoRollbackEnabled
@@ -175,8 +175,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  Continuous automated rollback barrier. Merged agent changes are guarded by Unit, Integration, and E2E assertions.
-                  If any critical test fails post-merge, the system instantly reverts changes and writes an audit log.
+                  Simulation only: this screen tests rollback-policy scenarios using mock candidate changes. It does not monitor real merges or automatically revert repository changes.
                 </p>
               </div>
             </div>
@@ -239,8 +238,8 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
               {/* Master Switch */}
               <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
                 <div className="space-y-0.5">
-                  <span className="text-xs font-semibold text-white block">Auto-Rollback Master Engine</span>
-                  <span className="text-[11px] text-slate-400 block">Revert agent merge immediately upon critical test failure</span>
+                  <span className="text-xs font-semibold text-white block">Auto-Rollback Simulation Setting</span>
+                  <span className="text-[11px] text-slate-400 block">Simulate a revert when a configured test scenario fails</span>
                 </div>
                 <button
                   type="button"
@@ -388,9 +387,9 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
                   <Bug className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Interactive Rollback Verification Sandbox</h3>
+                  <h3 className="text-sm font-semibold text-white">Interactive Rollback Policy Simulation</h3>
                   <p className="text-[11px] text-slate-400">
-                    Test the automated rollback strategy by simulating an agent merging code that fails critical tests.
+                    Simulate a candidate change and inspect how the configured rollback policy would respond.
                   </p>
                 </div>
               </div>
@@ -460,15 +459,15 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
               {isSimulating ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Executing Agent Merge & Evaluating Rollback Guard...</span>
+                  <span>Running rollback policy simulation...</span>
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 fill-current" />
                   <span>
                     {simulationMode === 'clean'
-                      ? 'Simulate Clean Agent Merge (Verify Tests Pass)'
-                      : 'Simulate Agent Merge with Bug & Trigger Automated Rollback'}
+                      ? 'Simulate clean candidate change'
+                      : 'Simulate failing candidate change'}
                   </span>
                 </>
               )}
@@ -542,7 +541,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
 
         {rollbackLogs.length === 0 ? (
           <div className="py-8 text-center text-slate-500 text-xs">
-            No rollback actions recorded yet. Use the simulation lab above to test automated reversions!
+            No rollback events recorded. Use the simulator above to exercise example scenarios.
           </div>
         ) : (
           <div className="space-y-3">
@@ -618,7 +617,7 @@ export const RollbackCenter: React.FC<RollbackCenterProps> = ({ project, onProje
 
         {snapshots.length === 0 ? (
           <div className="py-8 text-center text-slate-500 text-xs">
-            No snapshots recorded. Use the "Take Manual Snapshot" button above or run a swarm to record checkpoints.
+            No snapshots recorded. Use the manual snapshot control to create a project-state snapshot.
           </div>
         ) : (
           <div className="space-y-3">
