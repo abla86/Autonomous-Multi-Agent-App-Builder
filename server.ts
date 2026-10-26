@@ -174,7 +174,7 @@ function apiRateLimited(req: Request): boolean {
 }
 
 app.use('/api', (req, res, next) => {
-  if (req.path === '/health' || req.path.startsWith('/system/performance')) return next();
+  if (req.method === 'GET' && (req.path === '/health' || req.path === '/system/performance' || req.path === '/system/performance/stream')) return next();
   if (apiRateLimited(req)) {
     res.setHeader('Retry-After', '60');
     return res.status(429).json({ success: false, error: 'Too many requests.' });
