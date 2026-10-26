@@ -36,7 +36,9 @@ jobs:
       - name: Security boundary assertions
         run: |
           grep -q 'APP_API_KEY' server.ts
-          grep -q 'timingSafeEqual' server.ts
+          grep -q 'timingSafeEqual' src/server/security.ts
+          grep -q 'isRemoteExposure(HOST)' server.ts
+          grep -q "'/system/performance/reset'" server.ts || grep -q "system/performance/reset" server.ts
           grep -q 'Remote production exposure requires APP_API_KEY' server.ts
           grep -q "app.listen(PORT, HOST" server.ts
       - name: Build
