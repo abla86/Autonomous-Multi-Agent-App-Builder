@@ -125,21 +125,24 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
       else level = 'low';
 
     } else {
-      // Metric: Health Grade (0 - 100)
+      // Report the recorded status, not a fabricated numeric health score.
       if (status === 'passed') {
-        value = 98 - (agent.index % 5);
-        level = 'low'; // In health, low risk = green/optimal
+        value = 1;
+        level = 'low';
+        label = 'PASS';
       } else if (status === 'fixed') {
-        value = 90;
+        value = 1;
         level = 'medium';
+        label = 'FIXED';
       } else if (status === 'warning') {
-        value = 75;
+        value = 0;
         level = 'high';
+        label = 'WARN';
       } else {
-        value = 50;
+        value = 0;
         level = 'critical';
+        label = 'ERROR';
       }
-      label = `${value}%`;
     }
 
     return {
@@ -184,6 +187,9 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
   return (
     <div id="agent-heatmap-container" className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-5">
       {/* Header & Metric Controls */}
+      <p className="text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+        Role-level findings are not mapped to individual files. Empty cells mean no result was recorded; this view is not a file-by-file audit.
+      </p>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <div className="flex items-center space-x-2.5">
