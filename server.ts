@@ -6,6 +6,7 @@ import os from 'os';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { isRemoteExposure, timingSafeApiKeyMatch } from './src/server/security';
 import {
   getFeatureFlags,
   toggleFeatureFlag,
@@ -65,7 +66,7 @@ const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "0.0.0.0";
 const isProduction = process.env.NODE_ENV === "production";
-const remoteExposure = !["127.0.0.1", "localhost", "::1", "0.0.0.0"].includes(HOST);
+const remoteExposure = isRemoteExposure(HOST);
 const API_KEY = process.env.APP_API_KEY?.trim() || "";
 const MAX_TEXT_LENGTH = 100_000;
 const MAX_NAME_LENGTH = 200;
@@ -95,13 +96,6 @@ function boundedId(value: unknown): string | null {
 // several segments). Named params are always a single string at runtime.
 function routeParam(value: string | string[]): string {
   return Array.isArray(value) ? value[0] ?? '' : value;
-}
-
-function timingSafeApiKeyMatch(supplied: string): boolean {
-  if (!API_KEY || !supplied) return false;
-  const a = Buffer.from(supplied);
-  const b = Buffer.from(API_KEY);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 app.disable('x-powered-by');
@@ -180,14 +174,14 @@ function apiRateLimited(req: Request): boolean {
 }
 
 app.use('/api', (req, res, next) => {
-  if (req.path === '/health' || req.path.startsWith('/system/performance')) return next();
+  if (req.method === 'GET' && (req.path === '/health' || req.path === '/system/performance' || req.path === '/system/performance/stream')) return next();
   if (apiRateLimited(req)) {
     res.setHeader('Retry-After', '60');
     return res.status(429).json({ success: false, error: 'Too many requests.' });
   }
   if (!isProduction || !remoteExposure) return next();
   const supplied = typeof req.headers['x-api-key'] === 'string' ? req.headers['x-api-key'] : '';
-  if (!timingSafeApiKeyMatch(supplied)) return res.status(401).json({ success: false, error: 'API authentication required.' });
+  if (!timingSafeApiKeyMatch(supplied, API_KEY)) return res.status(401).json({ success: false, error: 'API authentication required.' });
   return next();
 });
 
@@ -208,22 +202,22 @@ interface DBStructure {
 }
 
 function getInitialDB(): DBStructure {
-  return {
+  const initial: DBStructure = {
     projects: [
       {
         id: 'proj-swarm-core',
         name: 'SwarmForge Autonomous Engine',
         description: 'Multi-agent distributed orchestration server with real-time state machines and fault-tolerant workers.',
         version: '1.4.0',
-        status: 'tested',
-        healthScore: 98,
+        status: 'draft',
+        healthScore: 0,
         createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
         updatedAt: new Date().toISOString(),
         stats: {
           linesOfCode: 1840,
           filesCount: 6,
-          testsPassed: 18,
-          securityGrade: 'A+',
+          testsPassed: 0,
+          securityGrade: 'Unverified',
         },
         files: [
           {
@@ -340,15 +334,15 @@ export class PersistentStore {
         name: 'CloudGuard Observability Dashboard',
         description: 'Microservice telemetry monitor with automated vulnerability detection and latency metrics.',
         version: '2.0.1',
-        status: 'production-ready',
-        healthScore: 95,
+        status: 'draft',
+        healthScore: 0,
         createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
         updatedAt: new Date().toISOString(),
         stats: {
           linesOfCode: 1220,
           filesCount: 4,
-          testsPassed: 14,
-          securityGrade: 'A',
+          testsPassed: 0,
+          securityGrade: 'Unverified',
         },
         files: [
           {
@@ -399,6 +393,20 @@ export function scanHeaders(headers: Record<string, string>): VulnerabilityCheck
     auditLogs: [],
     lastSwarmRuns: {},
   };
+  // Seed projects are examples, not verified production artifacts. Derive file counts
+  // from stored data and never seed passing tests or security grades.
+  for (const project of initial.projects) {
+    project.status = 'draft';
+    project.healthScore = 0;
+    project.stats = {
+      ...project.stats,
+      linesOfCode: (project.files || []).reduce((total: number, file: any) => total + (typeof file.content === 'string' ? file.content.split(/\r?\n/).length : 0), 0),
+      filesCount: (project.files || []).length,
+      testsPassed: 0,
+      securityGrade: 'Unverified',
+    };
+  }
+  return initial;
 }
 
 function readDB(): DBStructure {
@@ -470,12 +478,12 @@ const initialMem = process.memoryUsage();
 const swarmTelemetry: TelemetryStats = {
   isSwarmActive: false,
   activeWorkers: 0,
-  totalCycles: 1,
-  totalTasksCompleted: 20,
-  avgCycleDurationMs: 82,
+  totalCycles: 0,
+  totalTasksCompleted: 0,
+  avgCycleDurationMs: 0,
   peakMemoryMb: Math.round((initialMem.rss / 1024 / 1024) * 100) / 100,
-  totalAssertionsVerified: 16,
-  cycleDurations: [82],
+  totalAssertionsVerified: 0,
+  cycleDurations: [],
 };
 
 interface PerformanceHistoryPoint {
@@ -503,7 +511,7 @@ const sessionEvents: SessionEvent[] = [
     timestamp: sessionStartTime,
     type: 'session_start',
     label: 'Swarm Session Inception',
-    details: 'Master orchestrator and 20 specialized agent worker threads initialized.',
+    details: 'Static inspection engine initialized. The 20 agent roles are descriptive and are not separate worker threads.',
   },
 ];
 const MAX_HISTORY_POINTS = 60;
@@ -854,7 +862,7 @@ app.post('/api/system/simulate-error', (req: Request, res: Response, next: NextF
       id: 'proj-fallback-safe',
       name: 'Safe Fallback Cached Project',
       status: 'draft',
-      healthScore: 90,
+      healthScore: 0,
       files: [],
     };
 
@@ -984,7 +992,7 @@ app.get('/api/system/status', (req: Request, res: Response) => {
     aiEngineAvailable: Boolean(process.env.GEMINI_API_KEY),
     aiModel: 'gemini-3.8-flash',
     totalProjects: db.projects.length,
-    activeAgentsPool: 20,
+    activeAgentsPool: 0,
     timestamp: new Date().toISOString(),
   });
 });
@@ -1028,14 +1036,14 @@ app.post('/api/projects', (req: Request, res: Response) => {
     description: description || 'New autonomous application scaffold',
     version: '1.0.0',
     status: 'draft',
-    healthScore: 85,
+    healthScore: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     stats: {
-      linesOfCode: 120,
+      linesOfCode: 0,
       filesCount: 2,
       testsPassed: 0,
-      securityGrade: 'A',
+      securityGrade: 'Unverified',
     },
     files: [
       {
@@ -1044,7 +1052,7 @@ app.post('/api/projects', (req: Request, res: Response) => {
         path: '/src/App.tsx',
         language: 'typescript',
         updatedAt: new Date().toISOString(),
-        content: `export default function App() {\n  return (\n    <main className="p-6 max-w-4xl mx-auto">\n      <h1 className="text-2xl font-bold text-slate-900">${name}</h1>\n      <p className="text-slate-600 mt-2">Built autonomously with the 20-agent swarm.</p>\n    </main>\n  );\n}`,
+        content: `export default function App() {\n  return (\n    <main className="p-6 max-w-4xl mx-auto">\n      <h1 className="text-2xl font-bold text-slate-900">${name}</h1>\n      <p className="text-slate-600 mt-2">Created from the project scaffold.</p>\n    </main>\n  );\n}`,
       },
       {
         id: newId('file'),
@@ -1057,6 +1065,11 @@ app.post('/api/projects', (req: Request, res: Response) => {
     ],
   };
 
+  newProject.stats.linesOfCode = newProject.files.reduce((total: number, file: any) => total + file.content.split(/\r?\n/).length, 0);
+  newProject.stats.filesCount = newProject.files.length;
+  newProject.stats.testsPassed = 0;
+  newProject.stats.securityGrade = 'Unverified';
+  newProject.healthScore = 0;
   db.projects.unshift(newProject);
   writeDB(db);
 
@@ -1503,23 +1516,14 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
   }
 
   // Checkpoint pre-merge snapshot
-  const preSwarmSnapshot = createSnapshot(
-    project.id,
-    `Pre-Swarm run checkpoint (${new Date().toLocaleTimeString()})`,
-    'agent_pre_merge',
-    'MASTER_ORCHESTRATOR',
-    project.files
-  );
-
-
   swarmTelemetry.isSwarmActive = true;
-  swarmTelemetry.activeWorkers = 20;
+  swarmTelemetry.activeWorkers = 0;
   sessionEvents.push({
     id: newId('evt'),
     timestamp: new Date().toISOString(),
     type: 'swarm_start',
     label: `Swarm Orchestration Triggered: ${project.name}`,
-    details: `Master Orchestrator parallelized all 20 agents on ${project.files.length} repository files.`,
+    details: `Static source inspection started for ${project.files.length} stored file record(s). No project code will be executed or modified.`,
   });
 
   const startTime = Date.now();
@@ -1535,8 +1539,8 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     });
   };
 
-  addLog('MASTER_ORCHESTRATOR', 'info', 'Initiating 20-Agent Autonomous Swarm Execution Cycle.');
-  addLog('MASTER_ORCHESTRATOR', 'info', `Scanning repository structure for project: ${project.name} (${project.files.length} files)`);
+  addLog('MASTER_ORCHESTRATOR', 'info', 'Starting bounded static source inspection; no autonomous agent execution or source-code repair occurs in this route.');
+  addLog('MASTER_ORCHESTRATOR', 'info', `Inspecting stored source text for ${project.name} (${project.files.length} files); the repository is not executed.`);
 
   // 1. Codebase Analyst
   results['AGENT_1_ANALYST'] = {
@@ -1831,30 +1835,108 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     repairsApplied: ['Issued Production Readiness Certificate'],
   };
 
+  // Perform real, bounded source-text checks over the stored project files.
+  // This is static analysis only: it does not execute agents, build the project, or apply repairs.
+  logs.length = 0;
+  const storedFiles = Array.isArray(project.files) ? project.files : [];
+  const findingsByAgent: Record<string, string[]> = {};
+  const unverifiedRoles = new Set([
+    'AGENT_12_E2E',
+    'AGENT_13_DEVOPS',
+    'AGENT_14_DEPENDENCY',
+    'AGENT_18_RECOVERY',
+    'AGENT_19_AI',
+    'AGENT_20_QA',
+  ]);
+  const recordFinding = (agentId: string, message: string) => {
+    if (!findingsByAgent[agentId]) findingsByAgent[agentId] = [];
+    findingsByAgent[agentId].push(message);
+  };
+  const paths = storedFiles.map((file: any) => file?.path).filter((value: any) => typeof value === 'string');
+  const ids = storedFiles.map((file: any) => file?.id).filter((value: any) => typeof value === 'string');
+  const duplicatePathCount = paths.length - new Set(paths).size;
+  const duplicateIdCount = ids.length - new Set(ids).size;
+  const hasFrontend = storedFiles.some((file: any) => /\.(?:tsx|jsx|html)$/i.test(String(file?.path || '')));
+  const hasTests = storedFiles.some((file: any) => /(?:^|[./_-])(?:tests?|specs?)(?:[./_-]|$)|\.(?:test|spec)\.[cm]?[jt]sx?$/i.test(String(file?.path || '')));
+  const hasReadme = storedFiles.some((file: any) => /(?:^|\/)readme(?:\.[^/]*)?$/i.test(String(file?.path || '')));
+  const sourceChecks = [
+    { agent: 'AGENT_6_AUTH', regex: /AIza[0-9A-Za-z_-]{35}|sk-[0-9A-Za-z]{24,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/, label: 'Potential hardcoded credential pattern detected' },
+    { agent: 'AGENT_7_SECURITY', regex: /\beval\s*\(|new\s+Function\s*\(/, label: 'Dynamic code execution pattern detected' },
+    { agent: 'AGENT_7_SECURITY', regex: /dangerouslySetInnerHTML/, label: 'dangerouslySetInnerHTML usage requires manual sanitization review' },
+    { agent: 'AGENT_7_SECURITY', regex: /\b(?:exec|execSync)\s*\(/, label: 'Shell execution pattern detected; verify argument handling' },
+    { agent: 'AGENT_2_FRONTEND', regex: /<img\b(?![^>]*\balt\s*=)[^>]*>/i, label: 'Image element may be missing alternative text' },
+    { agent: 'AGENT_10_A11Y', regex: /<img\b(?![^>]*\balt\s*=)[^>]*>/i, label: 'Image element may be missing alternative text' },
+    { agent: 'AGENT_9_UX', regex: /<img\b(?![^>]*\balt\s*=)[^>]*>/i, label: 'Image element may be missing alternative text' },
+    { agent: 'AGENT_8_PERFORMANCE', regex: /console\.log\s*\(/, label: 'console.log call found; confirm it is appropriate for production' },
+    { agent: 'AGENT_1_ANALYST', regex: /\bTODO\b|\bFIXME\b/, label: 'TODO/FIXME marker found; assess whether it blocks release' },
+  ];
+  for (const file of storedFiles) {
+    const code = typeof file?.content === 'string' ? file.content : '';
+    const filePath = typeof file?.path === 'string' && file.path ? file.path : '(missing path)';
+    if (!file || typeof file.id !== 'string' || !file.id || typeof file.path !== 'string' || !file.path.trim() || typeof file.name !== 'string' || typeof file.content !== 'string') {
+      recordFinding('AGENT_1_ANALYST', `Invalid file descriptor: ${filePath}`);
+      recordFinding('AGENT_17_INTEGRITY', `File descriptor has missing or invalid required fields: ${filePath}`);
+    }
+    if (code.length > 100_000) recordFinding('AGENT_8_PERFORMANCE', `Large stored source file (${code.length} characters): ${filePath}; review memory and editor performance.`);
+    for (const rule of sourceChecks) {
+      if (rule.regex.test(code)) recordFinding(rule.agent, `${rule.label} in ${filePath}.`);
+    }
+  }
+  if (storedFiles.length === 0) recordFinding('AGENT_1_ANALYST', 'Project contains no stored files to inspect.');
+  if (duplicatePathCount > 0) {
+    recordFinding('AGENT_4_DATABASE', `${duplicatePathCount} duplicate file path(s) found.`);
+    recordFinding('AGENT_17_INTEGRITY', `${duplicatePathCount} duplicate file path(s) found.`);
+  }
+  if (duplicateIdCount > 0) recordFinding('AGENT_17_INTEGRITY', `${duplicateIdCount} duplicate file identifier(s) found.`);
+  if (!hasFrontend) recordFinding('AGENT_2_FRONTEND', 'No .tsx, .jsx or .html file was found in the stored project file list.');
+  if (!hasTests) recordFinding('AGENT_11_TEST', 'No test/spec file was found in the stored project file list; no project tests were executed by this scan.');
+  if (!hasReadme) recordFinding('AGENT_15_DOCS', 'No README file was found in the stored project file list.');
+  if (!String(project.name || '').trim() || !String(project.description || '').trim()) recordFinding('AGENT_16_PRODUCT', 'Project name or description is missing.');
+  recordFinding('AGENT_12_E2E', 'Browser end-to-end tests were not executed by this static scan.');
+  recordFinding('AGENT_13_DEVOPS', 'The stored project was not installed, built, or launched by this scan.');
+  recordFinding('AGENT_14_DEPENDENCY', 'Dependency advisories were not checked; package installation and an audit were not run.');
+  recordFinding('AGENT_18_RECOVERY', 'Runtime failure and recovery scenarios were not executed.');
+  recordFinding('AGENT_19_AI', 'The AI model was not invoked by the static scan; use the AI consultation endpoint separately.');
+  recordFinding('AGENT_20_QA', 'Production readiness cannot be established without a real build, runtime checks, dependency audit, and E2E evidence.');
+
+  for (const [agentId, result] of Object.entries(results) as [string, any][]) {
+    const findings = findingsByAgent[agentId] || [];
+    const unverified = unverifiedRoles.has(agentId);
+    result.status = findings.length > 0 || unverified ? 'warning' : 'passed';
+    result.summary = unverified
+      ? 'Limited static checks only; this role requires external/runtime validation not performed here.'
+      : findings.length > 0
+        ? `${findings.length} source/project finding(s) recorded by the limited static checks.`
+        : 'Limited static checks completed; no findings were detected under this role’s rules.';
+    result.findings = findings.length > 0 ? findings : ['No findings under the limited checks performed; this is not a full verification.'];
+    result.repairsApplied = [];
+  }
+  addLog('MASTER_ORCHESTRATOR', 'info', `Static source inspection completed for ${storedFiles.length} stored file(s); no source files were modified.`);
+  addLog('AGENT_20_QA', 'warn', 'Build, runtime security, dependency audit and browser E2E checks remain unverified.');
+
   const executionDuration = Date.now() - startTime;
   swarmTelemetry.isSwarmActive = false;
   swarmTelemetry.activeWorkers = 0;
   swarmTelemetry.totalCycles += 1;
-  swarmTelemetry.totalTasksCompleted += 20;
+  // No completed agent tasks are counted for a simulation-only run.
   swarmTelemetry.cycleDurations.push(executionDuration);
   if (swarmTelemetry.cycleDurations.length > 50) swarmTelemetry.cycleDurations.shift();
   swarmTelemetry.avgCycleDurationMs = Math.round(
     swarmTelemetry.cycleDurations.reduce((a, b) => a + b, 0) / swarmTelemetry.cycleDurations.length
   );
-  swarmTelemetry.totalAssertionsVerified += 16;
+  // No assertions are counted because this route did not execute tests.
   sessionEvents.push({
     id: 'evt-' + Date.now(),
     timestamp: new Date().toISOString(),
     type: 'swarm_end',
     label: `Swarm Execution Cycle Complete (${executionDuration}ms)`,
-    details: 'All 20 agents verified codebase and stabilized project assets.',
+    details: 'Static source inspection completed. No source files were modified; runtime/build checks remain unverified.',
   });
 
-  addLog('AGENT_20_QA', 'success', 'All 20 agents reported green. Swarm run completed successfully.');
-  addLog('MASTER_ORCHESTRATOR', 'success', `Execution loop terminated in ${executionDuration}ms.`);
+  addLog('AGENT_20_QA', 'warn', 'Static checks completed; required build, runtime, dependency and E2E verification remains outstanding.');
+  addLog('MASTER_ORCHESTRATOR', 'info', `Static source inspection completed in ${executionDuration}ms; no code repairs were applied.`);
 
-  project.status = 'production-ready';
-  project.healthScore = 98;
+  project.status = 'draft';
   project.updatedAt = new Date().toISOString();
   db.lastSwarmRuns[project.id] = {
     timestamp: new Date().toISOString(),
@@ -1863,44 +1945,14 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     logs,
   };
 
-  // Automated Test Guard check post-swarm
-  const testEval = evaluateCriticalTests(project);
-  const rollbackConfig = getRollbackConfig();
-  const autoRollbackActive =
-    isFeatureEnabled('auto_rollback_on_test_failure', true) && rollbackConfig.autoRollbackEnabled;
-
-  if (!testEval.allPassed && autoRollbackActive) {
-    const rbResult = executeRollback(
-      project.id,
-      preSwarmSnapshot.id,
-      `Critical tests failed post-swarm: ${testEval.failedTests.map((t) => t.name).join(', ')}`,
-      testEval.failedTests,
-      'AGENT_18_RECOVERY',
-      true
-    );
-    project.files = rbResult.restoredFiles;
-    project.stats.filesCount = project.files.length;
-    project.updatedAt = new Date().toISOString();
-    addLog(
-      'AGENT_18_RECOVERY',
-      'warn',
-      `[AUTOMATED ROLLBACK ACTIVATED] Project reverted to snapshot ${preSwarmSnapshot.id} due to ${testEval.failedTests.length} critical test failures.`
-    );
-  } else {
-    createSnapshot(
-      project.id,
-      `Post-Swarm verified baseline (${new Date().toLocaleTimeString()})`,
-      'agent_post_merge',
-      'AGENT_20_QA',
-      project.files
-    );
-  }
-
+  // This inspection does not change source files, so rollback and merge snapshots are not applicable.
   writeDB(db);
 
 
   return res.status(200).json({
     success: true,
+    mode: 'static_analysis',
+    warning: 'This endpoint performs limited source-text checks only. It does not execute autonomous agents, apply repairs, build or run the project, audit installed dependencies, or run browser E2E tests.',
     executionTimeMs: executionDuration,
     results,
     logs,
@@ -1967,197 +2019,148 @@ app.post('/api/projects/:id/swarm/report-log', (req: Request, res: Response) => 
   });
 });
 
-// Run Real Tests on Project
+// Run real project-integrity assertions. This endpoint does not claim to run the user's app or E2E tests.
 app.post('/api/projects/:id/tests/run', (req: Request, res: Response) => {
   const projectId = boundedId(req.params.id);
   if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
-  if (!project) {
-    return res.status(404).json({ success: false, error: 'Project not found' });
-  }
+  if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
 
-  const tests: any[] = [
-    {
-      id: 't-unit-1',
-      name: 'Project schema validation',
-      suite: 'unit',
-      status: 'passed',
-      durationMs: 4,
-      assertion: 'assert(typeof project.name === "string" && project.name.length > 0)',
-      details: `Project name "${project.name}" matches required schema.`,
-    },
-    {
-      id: 't-unit-2',
-      name: 'Files array integrity',
-      suite: 'unit',
-      status: 'passed',
-      durationMs: 3,
-      assertion: 'assert(Array.isArray(project.files) && project.files.length >= 1)',
-      details: `Contains ${project.files.length} valid file descriptors with non-empty paths.`,
-    },
-    {
-      id: 't-unit-3',
-      name: 'Unique file paths check',
-      suite: 'unit',
-      status: 'passed',
-      durationMs: 2,
-      assertion: 'assert(new Set(project.files.map(f => f.path)).size === project.files.length)',
-      details: 'Zero duplicate file paths within project repository.',
-    },
-    {
-      id: 't-int-1',
-      name: 'Database atomic write roundtrip',
-      suite: 'integration',
-      status: 'passed',
-      durationMs: 14,
-      assertion: 'assert(fs.existsSync(DB_FILE) && db.projects.length > 0)',
-      details: 'Disk read and write verified with atomic sync mechanism.',
-    },
-    {
-      id: 't-int-2',
-      name: 'Express server routing pipeline',
-      suite: 'integration',
-      status: 'passed',
-      durationMs: 8,
-      assertion: 'assert(app._router && app._router.stack.length > 0)',
-      details: 'Middleware stack correctly mounts health, system, and CRUD routes.',
-    },
-    {
-      id: 't-api-1',
-      name: 'GET /api/health endpoint response',
-      suite: 'api',
-      status: 'passed',
-      durationMs: 6,
-      assertion: 'expect(res.status).toBe(200); expect(res.body.status).toBe("healthy")',
-      details: 'Server reports healthy uptime and active database connection.',
-    },
-    {
-      id: 't-api-2',
-      name: 'GET /api/system/status diagnostics',
-      suite: 'api',
-      status: 'passed',
-      durationMs: 7,
-      assertion: 'expect(res.body.activeAgentsPool).toBe(20)',
-      details: 'System reports 20 active agent capabilities available.',
-    },
-    {
-      id: 't-e2e-1',
-      name: 'OPEN -> VIEW -> INSPECT user journey',
-      suite: 'e2e',
-      status: 'passed',
-      durationMs: 22,
-      assertion: 'assert(project.files.every(f => f.content.length > 0))',
-      details: 'Virtual workspace renders all files and metadata successfully.',
-    },
-    {
-      id: 't-e2e-2',
-      name: 'MUTATE -> PERSIST -> RELOAD resilience',
-      suite: 'e2e',
-      status: 'passed',
-      durationMs: 18,
-      assertion: 'assert(readDB().projects.some(p => p.id === project.id))',
-      details: 'Modified state survives simulated container restart cycle.',
-    },
-    {
-      id: 't-e2e-3',
-      name: 'EXPORT archive payload verification',
-      suite: 'e2e',
-      status: 'passed',
-      durationMs: 12,
-      assertion: 'assert(JSON.stringify(project).length > 200)',
-      details: 'Export bundle packages valid JSON architecture blueprint.',
-    },
-  ];
+  const tests: any[] = [];
+  const runCheck = (id: string, name: string, suite: 'unit' | 'integration' | 'api' | 'e2e', assertion: string, check: () => { passed: boolean; details: string }) => {
+    const started = process.hrtime.bigint();
+    let status: 'passed' | 'failed' = 'failed';
+    let details = 'Assertion failed.';
+    try {
+      const result = check();
+      status = result.passed ? 'passed' : 'failed';
+      details = result.details;
+    } catch (error: any) {
+      status = 'failed';
+      details = error?.message || 'Assertion threw an unknown error.';
+    }
+    const durationMs = Number((process.hrtime.bigint() - started) / 1_000_000n);
+    tests.push({ id, name, suite, status, durationMs, assertion, details });
+  };
 
+  runCheck('t-unit-1', 'Project metadata is valid', 'unit',
+    'project.id, project.name and project.description are non-empty strings',
+    () => ({ passed: typeof project.id === 'string' && project.id.length > 0 && typeof project.name === 'string' && project.name.trim().length > 0 && typeof project.description === 'string', details: 'Checked the actual project metadata.' }));
+
+  runCheck('t-unit-2', 'Project files collection is valid', 'unit',
+    'project.files is an array',
+    () => ({ passed: Array.isArray(project.files), details: Array.isArray(project.files) ? `Found ${project.files.length} file records.` : 'Project files is not an array.' }));
+
+  runCheck('t-unit-3', 'File descriptors contain required fields', 'unit',
+    'Every file has a non-empty id, path, name and string content',
+    () => {
+      const invalid = (project.files || []).filter((f: any) => !f || typeof f.id !== 'string' || !f.id || typeof f.path !== 'string' || !f.path.trim() || typeof f.name !== 'string' || !f.name.trim() || typeof f.content !== 'string');
+      return { passed: invalid.length === 0, details: invalid.length === 0 ? 'All file descriptors contain the required fields.' : `${invalid.length} file descriptor(s) have missing or invalid fields.` };
+    });
+
+  runCheck('t-unit-4', 'File paths are unique', 'unit',
+    'Unique file paths count equals total file count',
+    () => {
+      const files = project.files || [];
+      const unique = new Set(files.map((f: any) => f.path));
+      return { passed: unique.size === files.length, details: unique.size === files.length ? 'No duplicate paths found.' : `${files.length - unique.size} duplicate path(s) found.` };
+    });
+
+  runCheck('t-unit-5', 'File identifiers are unique', 'unit',
+    'Unique file ids count equals total file count',
+    () => {
+      const files = project.files || [];
+      const unique = new Set(files.map((f: any) => f.id));
+      return { passed: unique.size === files.length, details: unique.size === files.length ? 'No duplicate file identifiers found.' : `${files.length - unique.size} duplicate file identifier(s) found.` };
+    });
+
+  runCheck('t-int-1', 'Persisted database contains the project', 'integration',
+    'Parse data/db.json from disk and locate this project id',
+    () => {
+      const raw = fs.readFileSync(DB_FILE, 'utf-8');
+      const diskDb = JSON.parse(raw);
+      const persisted = Array.isArray(diskDb.projects) && diskDb.projects.some((p: any) => p.id === project.id);
+      return { passed: persisted, details: persisted ? 'The current project record was found in the persisted JSON database.' : 'Project record was not found in the persisted JSON database.' };
+    });
+
+  runCheck('t-int-2', 'Database JSON is parseable', 'integration',
+    'JSON.parse(data/db.json) succeeds and projects is an array',
+    () => {
+      const diskDb = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+      return { passed: Array.isArray(diskDb.projects), details: Array.isArray(diskDb.projects) ? 'Persisted database JSON parsed successfully.' : 'Persisted database has no projects array.' };
+    });
+
+  const passed = tests.filter((t) => t.status === 'passed').length;
+  const failed = tests.filter((t) => t.status === 'failed').length;
   const totalDuration = tests.reduce((acc, t) => acc + t.durationMs, 0);
-
-  project.stats.testsPassed = tests.filter((t) => t.status === 'passed').length;
-  swarmTelemetry.totalAssertionsVerified += tests.length;
+  const timestamp = new Date().toISOString();
+  project.stats.testsPassed = passed;
+  (project as any).lastTestRun = { timestamp, total: tests.length, passed, failed, scope: 'project-integrity-and-persistence-only' };
+  project.updatedAt = timestamp;
   sessionEvents.push({
     id: 'evt-' + Date.now(),
-    timestamp: new Date().toISOString(),
+    timestamp,
     type: 'test_run',
-    label: `Test Suite Executed: ${project.name}`,
-    details: `${tests.filter((t) => t.status === 'passed').length} / ${tests.length} tests passed in ${totalDuration}ms.`,
+    label: `Project Integrity Checks: ${project.name}`,
+    details: `${passed}/${tests.length} actual assertions passed; ${failed} failed. App runtime, browser E2E and deployment builds were not tested by this endpoint.`,
   });
   writeDB(db);
 
   return res.status(200).json({
-    success: true,
+    success: failed === 0,
     runId: 'run-' + Date.now(),
     total: tests.length,
-    passed: tests.filter((t) => t.status === 'passed').length,
-    failed: tests.filter((t) => t.status === 'failed').length,
+    passed,
+    failed,
     durationMs: totalDuration,
-    timestamp: new Date().toISOString(),
+    timestamp,
+    scope: 'project-integrity-and-persistence-only',
+    limitations: ['This endpoint does not execute the generated project, run browser E2E tests, install dependencies, or build/deploy the project.'],
     tests,
   });
 });
 
-// Run Real Security Scan on Project Codebase
+// Bounded heuristic scan of stored project source. This is not a full security audit.
 app.post('/api/projects/:id/security-scan', (req: Request, res: Response) => {
   const projectId = boundedId(req.params.id);
   if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
-  if (!project) {
-    return res.status(404).json({ success: false, error: 'Project not found' });
-  }
+  if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
 
   const vulnerabilities: any[] = [];
   let scannedCount = 0;
+  const addFinding = (severity: 'critical' | 'high' | 'medium' | 'low', title: string, rule: string, file: string, description: string, resolution: string) => {
+    vulnerabilities.push({ id: newId('SEC'), severity, title, rule, file, description, resolution, status: 'detected' });
+  };
 
-  for (const file of project.files) {
+  for (const file of project.files || []) {
     scannedCount++;
-    const code = file.content || '';
-
-    // Check for raw API keys
-    if (/AIza[0-9A-Za-z-_]{35}/.test(code) || /sk-[0-9A-Za-z]{24,}/.test(code)) {
-      vulnerabilities.push({
-        id: 'SEC-KEY-' + Date.now(),
-        severity: 'critical',
-        title: 'Hardcoded API Key Detected',
-        rule: 'CWE-798: Use of Hard-coded Credentials',
-        file: file.path,
-        description: 'Plaintext secret found in source code.',
-        resolution: 'Move credentials to server-side environment variables.',
-        status: 'detected',
-      });
+    const code = typeof file.content === 'string' ? file.content : '';
+    const filePath = typeof file.path === 'string' ? file.path : '(unknown path)';
+    if (/AIza[0-9A-Za-z_-]{35}|sk-[0-9A-Za-z]{24,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(code)) {
+      addFinding('critical', 'Potential hardcoded secret detected', 'CWE-798', filePath, 'A string matches a common API-key or private-key pattern. Verify whether it is a real credential.', 'Revoke exposed credentials and move secrets to a server-side secret store.');
     }
-
-    // Check for dangerous eval()
-    if (/\beval\s*\(/.test(code)) {
-      vulnerabilities.push({
-        id: 'SEC-EVAL-' + Date.now(),
-        severity: 'high',
-        title: 'Dangerous eval() Call',
-        rule: 'CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code',
-        file: file.path,
-        description: 'Use of eval() allows arbitrary code execution.',
-        resolution: 'Replace eval() with safe JSON.parse or strict parsers.',
-        status: 'detected',
-      });
+    if (/\beval\s*\(/.test(code) || /new\s+Function\s*\(/.test(code)) {
+      addFinding('high', 'Dynamic code execution pattern detected', 'CWE-95', filePath, 'The file contains eval() or Function-constructor usage, which can enable code execution when input is untrusted.', 'Remove dynamic code execution or strictly constrain and validate the source.');
     }
-
-    // Check for unescaped innerHTML
     if (/dangerouslySetInnerHTML/.test(code) && !/DOMPurify/.test(code)) {
-      vulnerabilities.push({
-        id: 'SEC-XSS-' + Date.now(),
-        severity: 'medium',
-        title: 'Potentially Unsanitized innerHTML',
-        rule: 'CWE-79: Cross-site Scripting',
-        file: file.path,
-        description: 'Raw HTML rendered without explicit sanitization pipeline.',
-        resolution: 'Sanitize with DOMPurify or use standard React JSX text nodes.',
-        status: 'detected',
-      });
+      addFinding('medium', 'Potentially unsanitized HTML rendering', 'CWE-79', filePath, 'dangerouslySetInnerHTML appears without a DOMPurify reference in the same file. This heuristic may produce false positives.', 'Prefer normal React text rendering or sanitize untrusted HTML with a verified sanitizer.');
+    }
+    if (/\b(?:child_process\.)?(?:exec|execSync)\s*\(/.test(code)) {
+      addFinding('medium', 'Shell command execution pattern detected', 'CWE-78', filePath, 'Shell execution APIs can be unsafe when command strings contain untrusted input.', 'Prefer spawn/execFile with fixed executable and argument arrays; validate all inputs.');
     }
   }
 
-  const score = Math.max(70, 100 - vulnerabilities.length * 10);
-  const grade = vulnerabilities.some((v) => v.severity === 'critical') ? 'F' : vulnerabilities.length === 0 ? 'A+' : 'A';
-
+  const counts = {
+    critical: vulnerabilities.filter((v) => v.severity === 'critical').length,
+    high: vulnerabilities.filter((v) => v.severity === 'high').length,
+    medium: vulnerabilities.filter((v) => v.severity === 'medium').length,
+    low: vulnerabilities.filter((v) => v.severity === 'low').length,
+  };
+  const score = Math.max(0, 100 - counts.critical * 40 - counts.high * 25 - counts.medium * 10 - counts.low * 5);
+  const grade: 'A+' | 'A' | 'B' | 'C' | 'F' = counts.critical > 0 ? 'F' : counts.high > 0 ? 'C' : counts.medium > 0 ? 'B' : vulnerabilities.length === 0 ? 'A' : 'A';
   return res.status(200).json({
     success: true,
     report: {
@@ -2165,13 +2168,15 @@ app.post('/api/projects/:id/security-scan', (req: Request, res: Response) => {
       grade,
       scannedFiles: scannedCount,
       vulnerabilities,
+      scanMode: 'heuristic-source-patterns',
+      limitations: ['This scanner does not inspect installed dependency advisories, perform data-flow analysis, test live HTTP security headers, validate CORS configuration, or replace CodeQL/a professional security review. A clean result is not proof that the project is secure.'],
       checkedRules: {
-        secretsProtection: vulnerabilities.every((v) => !v.title.includes('API Key')),
-        xssGuards: vulnerabilities.every((v) => !v.title.includes('innerHTML')),
-        injectionPreventions: vulnerabilities.every((v) => !v.title.includes('eval')),
-        safeHeaders: true,
-        dependencySafety: true,
-        corsEnforcement: true,
+        secretsProtection: !vulnerabilities.some((v) => v.rule === 'CWE-798'),
+        xssGuards: !vulnerabilities.some((v) => v.rule === 'CWE-79'),
+        injectionPreventions: !vulnerabilities.some((v) => v.rule === 'CWE-95' || v.rule === 'CWE-78'),
+        safeHeaders: false,
+        dependencySafety: false,
+        corsEnforcement: false,
       },
     },
   });
@@ -2257,42 +2262,46 @@ Return ONLY valid JSON.`;
   }
 });
 
-// Final QA Deployment Gate Check (Agent 20)
+// Evidence-based deployment readiness gate. Unknown checks remain warnings and block readiness.
 app.get('/api/projects/:id/deploy-check', (req: Request, res: Response) => {
   const projectId = boundedId(req.params.id);
   if (!projectId) return res.status(400).json({ success: false, error: 'Invalid project id' });
   const db = readDB();
   const project = db.projects.find((p) => p.id === projectId);
-  if (!project) {
-    return res.status(404).json({ success: false, error: 'Project not found' });
-  }
+  if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
 
+  const files = Array.isArray(project.files) ? project.files : [];
+  const paths = files.map((f: any) => f?.path).filter((p: any) => typeof p === 'string');
+  const uniquePaths = new Set(paths).size === paths.length;
+  const validFiles = files.every((f: any) => f && typeof f.id === 'string' && typeof f.path === 'string' && f.path.trim().length > 0 && typeof f.name === 'string' && typeof f.content === 'string');
+  const lastTestRun = (project as any).lastTestRun;
+  const testRunCurrent = Boolean(lastTestRun?.timestamp && Date.parse(lastTestRun.timestamp) >= Date.parse(project.updatedAt || project.createdAt || ''));
+  const testRunPassed = testRunCurrent && lastTestRun.failed === 0 && lastTestRun.passed === lastTestRun.total && lastTestRun.scope === 'project-integrity-and-persistence-only';
+
+  const makeCheck = (id: string, label: string, agentRef: string, category: 'build' | 'security' | 'testing' | 'persistence' | 'api', status: 'pass' | 'fail' | 'warning', notes: string) => ({ id, label, agentRef, category, status, notes });
   const checks = [
-    { id: 'CHK-01', label: 'Application Starts & Listens on Port 3000', agentRef: 'AGENT_13_DEVOPS', category: 'build', status: 'pass', notes: 'Express server bound to 0.0.0.0:3000.' },
-    { id: 'CHK-02', label: 'Frontend Renders Clean Root Component', agentRef: 'AGENT_2_FRONTEND', category: 'build', status: 'pass', notes: 'React 19 entry point and Tailwind CSS styles mounted.' },
-    { id: 'CHK-03', label: 'Backend API Endpoints Healthy', agentRef: 'AGENT_3_BACKEND', category: 'api', status: 'pass', notes: '/api/health returns 200 OK.' },
-    { id: 'CHK-04', label: 'Database & Atomic Persistence Operational', agentRef: 'AGENT_4_DATABASE', category: 'persistence', status: 'pass', notes: 'Persistent JSON store active with atomic file swap.' },
-    { id: 'CHK-05', label: 'Main User Flow Fully Functional', agentRef: 'AGENT_16_PRODUCT', category: 'api', status: 'pass', notes: 'Zero mock stubs in critical user paths.' },
-    { id: 'CHK-06', label: 'State Survives Refresh & Restart', agentRef: 'AGENT_17_INTEGRITY', category: 'persistence', status: 'pass', notes: 'State is durable on filesystem.' },
-    { id: 'CHK-07', label: 'Unified API Error Envelope Enforced', agentRef: 'AGENT_5_API', category: 'api', status: 'pass', notes: 'HTTP error handlers return standard JSON.' },
-    { id: 'CHK-08', label: 'Authentication & Session Guards Verified', agentRef: 'AGENT_6_AUTH', category: 'security', status: 'pass', notes: 'Route protection barriers checked.' },
-    { id: 'CHK-09', label: 'Graceful Error Recovery Without Masking', agentRef: 'AGENT_18_RECOVERY', category: 'build', status: 'pass', notes: 'Zero silent failure catches.' },
-    { id: 'CHK-10', label: 'Zero Hardcoded Production Secrets', agentRef: 'AGENT_7_SECURITY', category: 'security', status: 'pass', notes: 'Codebase scanned for exposed API keys.' },
-    { id: 'CHK-11', label: 'Security Headers Active (CSP / nosniff)', agentRef: 'AGENT_7_SECURITY', category: 'security', status: 'pass', notes: 'Express security middleware in pipeline.' },
-    { id: 'CHK-12', label: 'Unit Test Assertions Pass 100%', agentRef: 'AGENT_11_TEST', category: 'testing', status: 'pass', notes: '10/10 automated assertions green.' },
-    { id: 'CHK-13', label: 'Integration & Persistence Tests Pass', agentRef: 'AGENT_11_TEST', category: 'testing', status: 'pass', notes: 'Store read/write cycle verified.' },
-    { id: 'CHK-14', label: 'End-to-End User Journey Passes', agentRef: 'AGENT_12_E2E', category: 'testing', status: 'pass', notes: 'Full lifecycle simulation verified.' },
-    { id: 'CHK-15', label: 'Zero Critical Blockers or TODO Debt', agentRef: 'AGENT_1_ANALYST', category: 'build', status: 'pass', notes: 'Zero blocking debt in repository.' },
-    { id: 'CHK-16', label: 'Living Documentation & Runbooks Up to Date', agentRef: 'AGENT_15_DOCS', category: 'build', status: 'pass', notes: 'API catalogue and architecture diagrams documented.' },
+    makeCheck('CHK-01', 'Project metadata valid', 'AGENT_1_ANALYST', 'api', typeof project.name === 'string' && project.name.trim().length > 0 ? 'pass' : 'fail', typeof project.name === 'string' && project.name.trim().length > 0 ? 'Project has a non-empty name.' : 'Project name is missing.'),
+    makeCheck('CHK-02', 'Project contains files', 'AGENT_1_ANALYST', 'build', files.length > 0 ? 'pass' : 'fail', `${files.length} file record(s) are stored.`),
+    makeCheck('CHK-03', 'File descriptors are valid', 'AGENT_17_INTEGRITY', 'persistence', validFiles ? 'pass' : 'fail', validFiles ? 'Required file fields are present.' : 'One or more file descriptors have invalid or missing fields.'),
+    makeCheck('CHK-04', 'File paths are unique', 'AGENT_17_INTEGRITY', 'persistence', uniquePaths ? 'pass' : 'fail', uniquePaths ? 'No duplicate paths found.' : 'Duplicate file paths exist.'),
+    makeCheck('CHK-05', 'Project integrity assertions passed', 'AGENT_11_TEST', 'testing', testRunPassed ? 'pass' : 'warning', testRunPassed ? `${lastTestRun.passed}/${lastTestRun.total} project-integrity assertions passed.` : 'No current successful test run is recorded. Run the test endpoint; its scope is limited to project integrity and persistence.'),
+    makeCheck('CHK-06', 'Application build verified', 'AGENT_13_DEVOPS', 'build', 'warning', 'This server does not build or execute the stored project. Run its real build in an isolated environment.'),
+    makeCheck('CHK-07', 'Browser end-to-end tests verified', 'AGENT_12_E2E', 'testing', 'warning', 'No browser-based end-to-end test evidence is collected by this gate.'),
+    makeCheck('CHK-08', 'Dependency vulnerability audit verified', 'AGENT_14_DEPENDENCY', 'security', 'warning', 'No project-specific dependency audit result is recorded by this gate.'),
+    makeCheck('CHK-09', 'Runtime authentication and authorization verified', 'AGENT_6_AUTH', 'security', 'warning', 'This gate does not execute authorization tests against the generated application.'),
+    makeCheck('CHK-10', 'External deployment configuration verified', 'AGENT_13_DEVOPS', 'build', 'warning', 'No deployment provider or environment configuration is verified by this gate.'),
   ];
 
-  const allPassed = checks.every((c) => c.status === 'pass');
-
+  const passed = checks.filter((c) => c.status === 'pass').length;
+  const blocking = checks.filter((c) => c.status !== 'pass').length;
+  const readyForDeploy = blocking === 0;
   return res.status(200).json({
     success: true,
-    readyForDeploy: allPassed,
-    score: 100,
+    readyForDeploy,
+    score: Math.round((passed / checks.length) * 100),
     timestamp: new Date().toISOString(),
+    evidenceMode: 'project-integrity-only',
+    limitations: ['A project cannot be certified production-ready until a real build, runtime/API security tests, dependency audit, and browser E2E tests have been run and recorded. Warnings block readiness.'],
     checks,
   });
 });

@@ -62,38 +62,40 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
     return selectedCategory === 'all' || a.category === selectedCategory;
   });
 
-  // Calculate cell value based on current metric
+  // Calculate cell value from recorded results only; never fabricate a baseline.
   const getCellData = (agent: AgentDefinition, target: { id: string; path: string; name: string }): CellData => {
     const res = lastResults ? lastResults[agent.id] : null;
-
-    // Deterministic synthetic baseline based on agent mandate relevance to file
-    const isTargetFile = target.path.includes('.tsx') || target.path.includes('.ts');
-    const isRelevantToAgent =
-      (agent.category === 'core' && (target.name.includes('App') || target.name.includes('server') || target.name.includes('storage'))) ||
-      (agent.category === 'quality' && (target.name.includes('Test') || target.path.includes('QA'))) ||
-      (agent.category === 'infrastructure' && (target.name.includes('server') || target.path.includes('Security') || target.name.includes('metrics'))) ||
-      (agent.category === 'product' && (target.name.includes('App') || target.path.includes('API')));
+    if (!res) {
+      return {
+        agent,
+        targetFile: target.path,
+        targetName: target.name,
+        value: 0,
+        label: '—',
+        level: 'none',
+        details: {
+          findings: ['No run result recorded; this cell has not been assessed.'],
+          repairs: [],
+          durationMs: 0,
+          status: 'not_run',
+        },
+      };
+    }
 
     let value = 0;
     let label = '';
     let level: 'none' | 'low' | 'medium' | 'high' | 'critical' = 'none';
 
-    const baseFindings = res?.findings || [
-      `Contract verified on ${target.name}`,
-      `Zero blocking violations detected in AST`,
-    ];
-    const baseRepairs = res?.repairsApplied || [
-      `Normalized defensive invariants for ${target.name}`,
-    ];
-    const durationMs = res?.durationMs || (20 + (agent.index * 7) % 45);
-    const status = res?.status || 'passed';
+    const baseFindings = res?.findings || ['No result recorded for this agent; no finding has been verified.'];
+    const baseRepairs = res?.repairsApplied || [];
+    const durationMs = res?.durationMs || 0;
+    const status = res?.status || 'warning';
 
     if (metric === 'operations') {
       // Metric: Operations & Invariant Repairs
       const repairsCount = res?.repairsApplied.length || 0;
       const findingsCount = res?.findings.length || 0;
-      const baseOps = isRelevantToAgent ? 3 + (agent.index % 4) : 1;
-      value = (res ? repairsCount * 2 + findingsCount : baseOps);
+      value = res ? repairsCount * 2 + findingsCount : 0;
 
       label = `${value} ops`;
       if (value > 6) level = 'critical';
@@ -113,7 +115,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
 
     } else if (metric === 'findings') {
       // Metric: Findings & Warnings
-      const findingsCount = res?.findings.length || (isRelevantToAgent ? 2 : 1);
+      const findingsCount = res?.findings.length || 0;
       const isWarn = status === 'warning';
       value = isWarn ? findingsCount + 3 : findingsCount;
       label = `${value} findings`;
@@ -123,21 +125,24 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
       else level = 'low';
 
     } else {
-      // Metric: Health Grade (0 - 100)
+      // Report the recorded status, not a fabricated numeric health score.
       if (status === 'passed') {
-        value = 98 - (agent.index % 5);
-        level = 'low'; // In health, low risk = green/optimal
+        value = 1;
+        level = 'low';
+        label = 'PASS';
       } else if (status === 'fixed') {
-        value = 90;
+        value = 1;
         level = 'medium';
+        label = 'FIXED';
       } else if (status === 'warning') {
-        value = 75;
+        value = 0;
         level = 'high';
+        label = 'WARN';
       } else {
-        value = 50;
+        value = 0;
         level = 'critical';
+        label = 'ERROR';
       }
-      label = `${value}%`;
     }
 
     return {
@@ -174,16 +179,17 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
 
   // Aggregated Bottlenecks
   const resultsList: AgentResult[] = lastResults ? (Object.values(lastResults) as AgentResult[]) : [];
-  const activeRepairsCount: number = resultsList.length > 0
-    ? resultsList.reduce((acc: number, r: AgentResult) => acc + (r.repairsApplied ? r.repairsApplied.length : 0), 0)
-    : 14;
-  const avgLatency: number = resultsList.length > 0
+  const activeRepairsCount: number = resultsList.reduce((acc: number, r: AgentResult) => acc + (r.repairsApplied ? r.repairsApplied.length : 0), 0);
+  const avgLatency: number | null = resultsList.length > 0
     ? Math.round(resultsList.reduce((acc: number, r: AgentResult) => acc + (r.durationMs || 0), 0) / resultsList.length)
-    : 48;
+    : null;
 
   return (
     <div id="agent-heatmap-container" className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-5">
       {/* Header & Metric Controls */}
+      <p className="text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+        Role-level findings are not mapped to individual files. Empty cells mean no result was recorded; this view is not a file-by-file audit.
+      </p>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <div className="flex items-center space-x-2.5">
