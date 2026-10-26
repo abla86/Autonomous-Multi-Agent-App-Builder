@@ -37,7 +37,8 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
     { id: 'qa', label: '6. FINAL QA', desc: 'Production Gate Verification' },
   ];
 
-  const currentPhaseIndex = isRunning ? 3 : results ? 5 : 0;
+  const hasVerifiedResults = Boolean(results && Object.values(results).some((result) => result.status === 'passed' || result.status === 'fixed'));
+  const currentPhaseIndex = isRunning ? 3 : hasVerifiedResults ? 5 : 0;
 
   const filteredLogs = logs.filter((log) => {
     if (activeFilter === 'errors') return log.level === 'error' || log.level === 'warn';
@@ -86,7 +87,7 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
               ) : (
                 <>
                   <Play className="w-4 h-4 fill-current" />
-                  <span>Launch 20-Agent Autonomous Cycle</span>
+                  <span>Generate 20-Role Simulation Report</span>
                 </>
               )}
             </button>
@@ -96,7 +97,7 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
         {/* Phase Stepper */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mt-6 pt-5 border-t border-slate-800">
           {phases.map((p, idx) => {
-            const isCompleted = idx < currentPhaseIndex || (!isRunning && results !== null);
+            const isCompleted = idx < currentPhaseIndex || (!isRunning && hasVerifiedResults);
             const isCurrent = isRunning && idx === currentPhaseIndex;
 
             return (
@@ -160,7 +161,7 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
         >
           {filteredLogs.length === 0 ? (
             <div className="text-slate-500 py-12 text-center font-sans text-xs">
-              Autonomous swarm telemetry will stream here upon launching an execution cycle.
+              This endpoint currently produces simulation-only role reports. It does not execute agents or modify project source files.
             </div>
           ) : (
             filteredLogs.map((entry, idx) => {
