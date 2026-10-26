@@ -420,15 +420,15 @@ export const SystemPerformanceMonitor: React.FC<SystemPerformanceMonitorProps> =
             </div>
 
             <div className="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800">
-              <span className="text-[10px] text-slate-500 block uppercase">V8 GC Flushes</span>
+              <span className="text-[10px] text-slate-500 block uppercase">GC Events Recorded</span>
               <span className="text-sm font-bold text-sky-400">{sessionSummary.totalGcEvents}</span>
-              <span className="text-[10px] text-slate-500 block">Memory flushes</span>
+              <span className="text-[10px] text-slate-500 block">Garbage-collection events</span>
             </div>
 
             <div className="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800">
               <span className="text-[10px] text-slate-500 block uppercase">Inspection Runs</span>
               <span className="text-sm font-bold text-emerald-400">{metrics.swarmStats.totalCycles}</span>
-              <span className="text-[10px] text-slate-500 block">No independent workers</span>
+              <span className="text-[10px] text-slate-500 block">Inspection runs only; no worker pool</span>
             </div>
           </div>
 
@@ -569,16 +569,16 @@ export const SystemPerformanceMonitor: React.FC<SystemPerformanceMonitorProps> =
               <span className="text-2xl font-bold font-mono text-white">
                 {metrics.swarmStats.totalTasksCompleted}
               </span>
-              <span className="text-xs text-slate-500 font-mono">tasks executed</span>
+              <span className="text-xs text-slate-500 font-mono">worker tasks are not executed</span>
             </div>
 
             <p className="text-[11px] text-slate-400 mt-1">
-              Active Workers (not used): <strong className="text-indigo-300 font-mono">{metrics.swarmStats.activeWorkers} </strong>
+              Independent workers: <strong className="text-indigo-300 font-mono">{metrics.swarmStats.activeWorkers} </strong>
             </p>
           </div>
 
           <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>Avg Latency:</span>
+            <span>Recorded cycle duration:</span>
             <span className="text-emerald-400 font-semibold">{metrics.swarmStats.avgCycleDurationMs}ms</span>
           </div>
         </div>
