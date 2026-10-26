@@ -128,6 +128,8 @@ export interface SecurityReport {
   grade: 'A+' | 'A' | 'B' | 'C' | 'F';
   scannedFiles: number;
   vulnerabilities: SecurityVulnerability[];
+  scanMode?: string;
+  limitations?: string[];
   checkedRules: {
     secretsProtection: boolean;
     xssGuards: boolean;
