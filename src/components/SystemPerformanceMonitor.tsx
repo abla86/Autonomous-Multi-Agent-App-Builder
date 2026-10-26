@@ -780,7 +780,7 @@ export const SystemPerformanceMonitor: React.FC<SystemPerformanceMonitorProps> =
             </div>
             <div>
               <span className="text-slate-500 block text-[10px]">TOTAL INVARIANTS CHECKED</span>
-              <span className="text-emerald-400 font-semibold">{metrics.swarmStats.totalAssertionsVerified} verified</span>
+              <span className="text-emerald-400 font-semibold">{metrics.swarmStats.totalAssertionsVerified} recorded</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[10px]">CONTAINER UPTIME</span>
