@@ -6,6 +6,7 @@ import os from 'os';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { isRemoteExposure, timingSafeApiKeyMatch } from './src/server/security';
 import {
   getFeatureFlags,
   toggleFeatureFlag,
@@ -65,7 +66,7 @@ const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "0.0.0.0";
 const isProduction = process.env.NODE_ENV === "production";
-const remoteExposure = !["127.0.0.1", "localhost", "::1"].includes(HOST.trim().toLowerCase()); // 0.0.0.0 listens on all interfaces and must be treated as remotely exposed.
+const remoteExposure = isRemoteExposure(HOST);
 const API_KEY = process.env.APP_API_KEY?.trim() || "";
 const MAX_TEXT_LENGTH = 100_000;
 const MAX_NAME_LENGTH = 200;
@@ -95,13 +96,6 @@ function boundedId(value: unknown): string | null {
 // several segments). Named params are always a single string at runtime.
 function routeParam(value: string | string[]): string {
   return Array.isArray(value) ? value[0] ?? '' : value;
-}
-
-function timingSafeApiKeyMatch(supplied: string): boolean {
-  if (!API_KEY || !supplied) return false;
-  const a = Buffer.from(supplied);
-  const b = Buffer.from(API_KEY);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 app.disable('x-powered-by');
@@ -187,7 +181,7 @@ app.use('/api', (req, res, next) => {
   }
   if (!isProduction || !remoteExposure) return next();
   const supplied = typeof req.headers['x-api-key'] === 'string' ? req.headers['x-api-key'] : '';
-  if (!timingSafeApiKeyMatch(supplied)) return res.status(401).json({ success: false, error: 'API authentication required.' });
+  if (!timingSafeApiKeyMatch(supplied, API_KEY)) return res.status(401).json({ success: false, error: 'API authentication required.' });
   return next();
 });
 
