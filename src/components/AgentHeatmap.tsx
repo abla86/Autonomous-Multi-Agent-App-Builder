@@ -87,12 +87,12 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
     const status = res?.status || 'warning';
 
     if (metric === 'operations') {
-      // Metric: Operations & Invariant Repairs
+      // Count only recorded findings and repairs; this is not a count of executed operations.
       const repairsCount = res?.repairsApplied.length || 0;
       const findingsCount = res?.findings.length || 0;
-      value = res ? repairsCount * 2 + findingsCount : 0;
+      value = res ? repairsCount + findingsCount : 0;
 
-      label = `${value} ops`;
+      label = `${value} items`;
       if (value > 6) level = 'critical';
       else if (value > 4) level = 'high';
       else if (value > 2) level = 'medium';
@@ -220,7 +220,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
               }`}
             >
               <Zap className="w-3.5 h-3.5" />
-              <span>Operations &amp; Repairs</span>
+              <span>Findings &amp; Repairs</span>
             </button>
             <button
               id="metric-btn-latency"
@@ -362,8 +362,8 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
             <Zap className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-slate-400 font-mono text-[11px] block">Total Swarm Operations</span>
-            <span className="text-slate-100 font-bold text-sm">{activeRepairsCount * 4 + 48} Invariant Checks</span>
+            <span className="text-slate-400 font-mono text-[11px] block">Recorded findings and repairs</span>
+            <span className="text-slate-100 font-bold text-sm">{resultsList.reduce((sum, r) => sum + (r.findings?.length || 0), 0)} findings · {activeRepairsCount} repairs</span>
           </div>
         </div>
 
@@ -372,7 +372,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
             <Clock className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-slate-400 font-mono text-[11px] block">Mean Agent Latency</span>
+            <span className="text-slate-400 font-mono text-[11px] block">Mean recorded result duration</span>
             <span className="text-slate-100 font-bold text-sm">{avgLatency} ms / module</span>
           </div>
         </div>
@@ -382,8 +382,8 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
             <Shield className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-slate-400 font-mono text-[11px] block">Bottlenecks &amp; High Contention</span>
-            <span className="text-emerald-400 font-bold text-sm">0 Blocking Contention Hotspots</span>
+            <span className="text-slate-400 font-mono text-[11px] block">Execution and contention metrics</span>
+            <span className="text-slate-300 font-bold text-sm">Not measured by this inspection</span>
           </div>
         </div>
       </div>
