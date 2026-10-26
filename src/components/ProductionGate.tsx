@@ -43,7 +43,7 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold text-white">Agent 20 Final QA & Production Gate</h2>
+                <h2 className="text-base font-bold text-white">Deployment Readiness Checks</h2>
                 <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${readyForDeploy ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
                   {readyForDeploy ? 'READY' : checks.length ? 'BLOCKED / INCOMPLETE' : isLoading ? 'CHECKING' : 'UNAVAILABLE'}
                 </span>
