@@ -2171,9 +2171,9 @@ app.post('/api/projects/:id/security-scan', (req: Request, res: Response) => {
       scanMode: 'heuristic-source-patterns',
       limitations: ['This scanner does not inspect installed dependency advisories, perform data-flow analysis, test live HTTP security headers, validate CORS configuration, or replace CodeQL/a professional security review. A clean result is not proof that the project is secure.'],
       checkedRules: {
-        secretsProtection: true,
-        xssGuards: true,
-        injectionPreventions: true,
+        secretsProtection: !vulnerabilities.some((v) => v.rule === 'CWE-798'),
+        xssGuards: !vulnerabilities.some((v) => v.rule === 'CWE-79'),
+        injectionPreventions: !vulnerabilities.some((v) => v.rule === 'CWE-95' || v.rule === 'CWE-78'),
         safeHeaders: false,
         dependencySafety: false,
         corsEnforcement: false,
