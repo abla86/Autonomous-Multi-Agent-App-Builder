@@ -54,10 +54,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ project }) => {
           <div>
             <div className="flex items-center space-x-2">
               <Bot className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-base font-bold text-white">Agent 19 — AI Integration & Gemini 3.8 Flash</h2>
+              <h2 className="text-base font-bold text-white">AI Code Review & Suggestions</h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Connects directly to server-side Gemini 3.8 Flash SDK for real-time automated refactoring, architecture reviews, and test generation.
+              Uses the configured server-side AI model to suggest code and architecture changes. Suggestions are not applied automatically and are not verified by a build or test run.
             </p>
           </div>
 
@@ -111,7 +111,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ project }) => {
 
         <div className="flex justify-between items-center">
           <span className="text-[11px] text-slate-500 font-mono">
-            Model: gemini-3.8-flash · Server-side execution only
+            Server-side AI · Suggestions only
           </span>
 
           <button
