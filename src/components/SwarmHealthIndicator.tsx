@@ -62,7 +62,7 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
     return () => clearInterval(interval);
   }, [autoToggleEnabled]);
 
-  // Aggregate individual agent data into single 0-100% health score
+  // Summarize recorded role-level reports using a heuristic index, not application health.
   const healthData: SwarmHealthScore = useMemo(() => {
     let totalScoreSum = 0;
     let assessedCount = 0;
@@ -254,7 +254,7 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
     report += `\n`;
 
     report += `${subDivider}\n`;
-    report += `INDIVIDUAL AGENT HEALTH SCORES & AUDIT\n`;
+    report += `ROLE REPORT INDEX & SUMMARY\n`;
     report += `${subDivider}\n`;
     report += `IDX | BADGE  | SCORE | STATUS  | AGENT NAME               | FINDINGS / REPAIRS\n`;
     report += `----+--------+-------+---------+--------------------------+---------------------\n`;
@@ -627,7 +627,7 @@ export const SwarmHealthIndicator: React.FC<SwarmHealthIndicatorProps> = ({
 
                   <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
                     <span>{cat.agentCount} Agents</span>
-                    <span className="text-emerald-400 font-medium">{cat.passedCount + cat.fixedCount} verified</span>
+                    <span className="text-emerald-400 font-medium">{cat.passedCount + cat.fixedCount} reported pass/fixed</span>
                   </div>
                 </div>
               );
