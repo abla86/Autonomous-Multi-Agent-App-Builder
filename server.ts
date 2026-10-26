@@ -1825,13 +1825,83 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     repairsApplied: ['Issued Production Readiness Certificate'],
   };
 
-  // Do not present static role templates as real execution results.
-  for (const result of Object.values(results) as any[]) {
-    result.status = 'warning';
-    result.summary = 'Not executed: this is a predefined role template, not a live agent result.';
-    result.findings = ['No repository analysis or code execution was performed by this role.'];
+  // Perform real, bounded source-text checks over the stored project files.
+  // This is static analysis only: it does not execute agents, build the project, or apply repairs.
+  const storedFiles = Array.isArray(project.files) ? project.files : [];
+  const findingsByAgent: Record<string, string[]> = {};
+  const unverifiedRoles = new Set([
+    'AGENT_12_E2E',
+    'AGENT_13_DEVOPS',
+    'AGENT_14_DEPENDENCY',
+    'AGENT_18_RECOVERY',
+    'AGENT_19_AI',
+    'AGENT_20_QA',
+  ]);
+  const recordFinding = (agentId: string, message: string) => {
+    if (!findingsByAgent[agentId]) findingsByAgent[agentId] = [];
+    findingsByAgent[agentId].push(message);
+  };
+  const paths = storedFiles.map((file: any) => file?.path).filter((value: any) => typeof value === 'string');
+  const ids = storedFiles.map((file: any) => file?.id).filter((value: any) => typeof value === 'string');
+  const duplicatePathCount = paths.length - new Set(paths).size;
+  const duplicateIdCount = ids.length - new Set(ids).size;
+  const hasFrontend = storedFiles.some((file: any) => /\.(?:tsx|jsx|html)$/i.test(String(file?.path || '')));
+  const hasTests = storedFiles.some((file: any) => /(?:^|[./_-])(?:tests?|specs?)(?:[./_-]|$)|\.(?:test|spec)\.[cm]?[jt]sx?$/i.test(String(file?.path || '')));
+  const hasReadme = storedFiles.some((file: any) => /(?:^|\/)readme(?:\.[^/]*)?$/i.test(String(file?.path || '')));
+  const sourceChecks = [
+    { agent: 'AGENT_6_AUTH', regex: /AIza[0-9A-Za-z_-]{35}|sk-[0-9A-Za-z]{24,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/, label: 'Potential hardcoded credential pattern detected' },
+    { agent: 'AGENT_7_SECURITY', regex: /\beval\s*\(|new\s+Function\s*\(/, label: 'Dynamic code execution pattern detected' },
+    { agent: 'AGENT_7_SECURITY', regex: /dangerouslySetInnerHTML/, label: 'dangerouslySetInnerHTML usage requires manual sanitization review' },
+    { agent: 'AGENT_7_SECURITY', regex: /\b(?:exec|execSync)\s*\(/, label: 'Shell execution pattern detected; verify argument handling' },
+    { agent: 'AGENT_2_FRONTEND', regex: /<img\b(?![^>]*\balt\s*=)[^>]*>/i, label: 'Image element may be missing alternative text' },
+    { agent: 'AGENT_10_A11Y', regex: /<img\b(?![^>]*\balt\s*=)[^>]*>/i, label: 'Image element may be missing alternative text' },
+    { agent: 'AGENT_9_UX', regex: /<img\b(?![^>]*\balt\s*=)[^>]*>/i, label: 'Image element may be missing alternative text' },
+    { agent: 'AGENT_8_PERFORMANCE', regex: /console\.log\s*\(/, label: 'console.log call found; confirm it is appropriate for production' },
+    { agent: 'AGENT_1_ANALYST', regex: /\bTODO\b|\bFIXME\b/, label: 'TODO/FIXME marker found; assess whether it blocks release' },
+  ];
+  for (const file of storedFiles) {
+    const code = typeof file?.content === 'string' ? file.content : '';
+    const filePath = typeof file?.path === 'string' && file.path ? file.path : '(missing path)';
+    if (!file || typeof file.id !== 'string' || !file.id || typeof file.path !== 'string' || !file.path.trim() || typeof file.name !== 'string' || typeof file.content !== 'string') {
+      recordFinding('AGENT_1_ANALYST', `Invalid file descriptor: ${filePath}`);
+      recordFinding('AGENT_17_INTEGRITY', `File descriptor has missing or invalid required fields: ${filePath}`);
+    }
+    if (code.length > 100_000) recordFinding('AGENT_8_PERFORMANCE', `Large stored source file (${code.length} characters): ${filePath}; review memory and editor performance.`);
+    for (const rule of sourceChecks) {
+      if (rule.regex.test(code)) recordFinding(rule.agent, `${rule.label} in ${filePath}.`);
+    }
+  }
+  if (storedFiles.length === 0) recordFinding('AGENT_1_ANALYST', 'Project contains no stored files to inspect.');
+  if (duplicatePathCount > 0) {
+    recordFinding('AGENT_4_DATABASE', `${duplicatePathCount} duplicate file path(s) found.`);
+    recordFinding('AGENT_17_INTEGRITY', `${duplicatePathCount} duplicate file path(s) found.`);
+  }
+  if (duplicateIdCount > 0) recordFinding('AGENT_17_INTEGRITY', `${duplicateIdCount} duplicate file identifier(s) found.`);
+  if (!hasFrontend) recordFinding('AGENT_2_FRONTEND', 'No .tsx, .jsx or .html file was found in the stored project file list.');
+  if (!hasTests) recordFinding('AGENT_11_TEST', 'No test/spec file was found in the stored project file list; no project tests were executed by this scan.');
+  if (!hasReadme) recordFinding('AGENT_15_DOCS', 'No README file was found in the stored project file list.');
+  if (!String(project.name || '').trim() || !String(project.description || '').trim()) recordFinding('AGENT_16_PRODUCT', 'Project name or description is missing.');
+  recordFinding('AGENT_12_E2E', 'Browser end-to-end tests were not executed by this static scan.');
+  recordFinding('AGENT_13_DEVOPS', 'The stored project was not installed, built, or launched by this scan.');
+  recordFinding('AGENT_14_DEPENDENCY', 'Dependency advisories were not checked; package installation and an audit were not run.');
+  recordFinding('AGENT_18_RECOVERY', 'Runtime failure and recovery scenarios were not executed.');
+  recordFinding('AGENT_19_AI', 'The AI model was not invoked by the static scan; use the AI consultation endpoint separately.');
+  recordFinding('AGENT_20_QA', 'Production readiness cannot be established without a real build, runtime checks, dependency audit, and E2E evidence.');
+
+  for (const [agentId, result] of Object.entries(results) as [string, any][]) {
+    const findings = findingsByAgent[agentId] || [];
+    const unverified = unverifiedRoles.has(agentId);
+    result.status = findings.length > 0 || unverified ? 'warning' : 'passed';
+    result.summary = unverified
+      ? 'Limited static checks only; this role requires external/runtime validation not performed here.'
+      : findings.length > 0
+        ? `${findings.length} source/project finding(s) recorded by the limited static checks.`
+        : 'Limited static checks completed; no findings were detected under this role’s rules.';
+    result.findings = findings.length > 0 ? findings : ['No findings under the limited checks performed; this is not a full verification.'];
     result.repairsApplied = [];
   }
+  addLog('MASTER_ORCHESTRATOR', 'info', `Static source inspection completed for ${storedFiles.length} stored file(s); no source files were modified.`);
+  addLog('AGENT_20_QA', 'warn', 'Build, runtime security, dependency audit and browser E2E checks remain unverified.');
 
   const executionDuration = Date.now() - startTime;
   swarmTelemetry.isSwarmActive = false;
@@ -1849,11 +1919,11 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     type: 'swarm_end',
     label: `Swarm Execution Cycle Complete (${executionDuration}ms)`,
-    details: 'Simulation completed. No agents verified the codebase and no project assets were modified.',
+    details: 'Static source inspection completed. No source files were modified; runtime/build checks remain unverified.',
   });
 
   addLog('AGENT_20_QA', 'success', 'All 20 agents reported green. Swarm run completed successfully.');
-  addLog('MASTER_ORCHESTRATOR', 'warn', `Simulation-only report generation completed in ${executionDuration}ms; no agent execution occurred.`);
+  addLog('MASTER_ORCHESTRATOR', 'info', `Static source inspection completed in ${executionDuration}ms; no code repairs were applied.`);
 
   project.status = 'draft';
   project.updatedAt = new Date().toISOString();
@@ -1902,8 +1972,8 @@ app.post('/api/projects/:id/swarm/run', async (req: Request, res: Response) => {
 
   return res.status(200).json({
     success: true,
-    mode: 'simulation_only',
-    warning: 'This endpoint currently generates predefined agent-role templates. It does not run agents, analyze source code, apply repairs, or execute tests.',
+    mode: 'static_analysis',
+    warning: 'This endpoint performs limited source-text checks only. It does not execute autonomous agents, apply repairs, build or run the project, audit installed dependencies, or run browser E2E tests.',
     executionTimeMs: executionDuration,
     results,
     logs,
