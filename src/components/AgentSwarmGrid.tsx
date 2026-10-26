@@ -117,7 +117,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
       const updated = currentList.map((t, idx) => ({ ...t, order: idx }));
 
       const agent = AGENT_REGISTRY.find((a) => a.id === agentId);
-      showToast(`🚀 Promoted "${item.title.slice(0, 32)}..." to TOP PRIORITY (#1 next in line) for ${agent?.name || agentId}!`);
+      showToast(`🚀 Promoted "${item.title.slice(0, 32)}..." to Top of local list for ${agent?.name || agentId}!`);
 
       return {
         ...prev,
@@ -212,12 +212,12 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
   });
 
   const getAgentStatus = (agentId: string) => {
-    if (isRunningSwarm) return { label: 'Executing...', color: 'text-amber-400 bg-amber-400/10 border-amber-500/20' };
+    if (isRunningSwarm) return { label: 'Inspection running', color: 'text-amber-400 bg-amber-400/10 border-amber-500/20' };
     if (!lastResults || !lastResults[agentId]) {
       return { label: 'Standing By', color: 'text-slate-400 bg-slate-800 border-slate-700' };
     }
     const res = lastResults[agentId];
-    if (res.status === 'passed') return { label: 'Verified', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
+    if (res.status === 'passed') return { label: 'Reported pass', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
     if (res.status === 'warning') return { label: 'Notice', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
     return { label: 'Attention', color: 'text-rose-400 bg-rose-500/10 border-rose-500/30' };
   };
@@ -615,7 +615,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                                 </span>
                                 {isTop && (
                                   <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
-                                    {isRunningSwarm ? 'Executing Now' : 'Next in Line'}
+                                    {isRunningSwarm ? 'Inspection running' : 'Planning only'}
                                   </span>
                                 )}
                               </div>
@@ -829,7 +829,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                                 </span>
                                 {isTop && (
                                   <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
-                                    {isRunningSwarm ? 'Executing' : 'Next'}
+                                    {isRunningSwarm ? 'Inspection running' : 'Planning only'}
                                   </span>
                                 )}
                               </div>
@@ -934,7 +934,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                       Latest Static Inspection Result
                     </span>
                     <span className="text-xs text-emerald-400 font-medium">
-                      Verified in {lastResults[inspectingAgent.id].durationMs}ms
+                      Recorded result duration: {lastResults[inspectingAgent.id].durationMs}ms
                     </span>
                   </div>
 
