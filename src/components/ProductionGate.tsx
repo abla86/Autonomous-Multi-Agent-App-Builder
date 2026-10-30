@@ -46,6 +46,9 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
                 <h2 className="text-base font-bold text-white">Deployment Readiness Checks</h2>
                 <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${readyForDeploy ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
                   {readyForDeploy ? 'CHECKS PASSED' : checks.length ? 'BLOCKED / INCOMPLETE' : isLoading ? 'CHECKING' : 'UNAVAILABLE'}
+                <h2 className="text-base font-bold text-white">Agent 20 Final QA & Production Gate</h2>
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${readyForDeploy ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                  {readyForDeploy ? 'READY' : checks.length ? 'BLOCKED / INCOMPLETE' : isLoading ? 'CHECKING' : 'UNAVAILABLE'}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
@@ -93,6 +96,8 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
           <div>
             <span className="text-[11px] text-slate-500 font-mono block">DEPLOYMENT CHECKS</span>
             <span className={`text-xl font-bold font-mono ${readyForDeploy ? "text-emerald-400" : "text-rose-400"}`}>{readyForDeploy ? "CHECKS PASSED" : "BLOCKED"}</span>
+            <span className="text-[11px] text-slate-500 font-mono block">PRODUCTION SIGN-OFF</span>
+            <span className={`text-xl font-bold font-mono ${readyForDeploy ? "text-emerald-400" : "text-rose-400"}`}>{readyForDeploy ? "READY" : "BLOCKED"}</span>
           </div>
         </div>
       </div>
@@ -101,6 +106,7 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
         <div className="px-4 py-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
           <span>Deployment Check Results</span>
+          <span>Final Acceptance Gate Matrix</span>
           <span>{checks.length} Evidence Checks</span>
         </div>
 

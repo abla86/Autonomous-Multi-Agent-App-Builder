@@ -82,6 +82,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
     let level: 'none' | 'low' | 'medium' | 'high' | 'critical' = 'none';
 
     const baseFindings = res?.findings || ['No result recorded for this role.'];
+    const baseFindings = res?.findings || ['No result recorded for this agent; no finding has been verified.'];
     const baseRepairs = res?.repairsApplied || [];
     const durationMs = res?.durationMs || 0;
     const status = res?.status || 'warning';
@@ -91,6 +92,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
       const repairsCount = res?.repairsApplied.length || 0;
       const findingsCount = res?.findings.length || 0;
       value = res ? repairsCount + findingsCount : 0;
+      value = res ? repairsCount * 2 + findingsCount : 0;
 
       label = `${value} items`;
       if (value > 6) level = 'critical';
@@ -112,6 +114,8 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
       // Metric: Findings & Warnings
       const findingsCount = res?.findings.length || 0;
       value = findingsCount;
+      const isWarn = status === 'warning';
+      value = isWarn ? findingsCount + 3 : findingsCount;
       label = `${value} findings`;
       if (value >= 5) level = 'critical';
       else if (value >= 3) level = 'high';

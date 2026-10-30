@@ -30,6 +30,16 @@ Do not treat a green project-integrity check, a clean heuristic scan, or a succe
 - **Telemetry and logs:** Do not assume logs are a complete audit trail or contain no sensitive information. Restrict access and configure retention appropriate to your deployment.
 
 
+Current implementation:
+- Express backend with JSON-file persistence using temporary-write-and-rename (`data/db.json`). This is suitable for a prototype, not a multi-writer production database.
+- Process-level CPU and memory telemetry for the builder server.
+- Project-integrity assertions that inspect stored project records and persisted JSON. They do not represent runtime/API/browser E2E testing of a generated app.
+- Heuristic source scanner for selected secret, dynamic-code, HTML-rendering, and shell-execution patterns. It is not a complete OWASP audit and does not inspect dependency advisories or runtime data flow.
+- Server-side Gemini consultation when `GEMINI_API_KEY` is configured. The AI endpoint returns suggestions; it does not automatically apply, build, or verify code changes.
+- A deployment gate that deliberately blocks readiness while required build, dependency, runtime-security, and browser E2E evidence is unavailable.
+
+Do not treat a green project-integrity check, a clean heuristic scan, or a successful server build as proof that a generated application is production-ready.
+
 ---
 
 ## 🤖 The 20 Defined Agent Roles
