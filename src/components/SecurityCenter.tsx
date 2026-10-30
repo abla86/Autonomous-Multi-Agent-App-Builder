@@ -51,12 +51,12 @@ export const SecurityCenter: React.FC<SecurityCenterProps> = ({
               {isScanning ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Scanning AST & Sources...</span>
+                  <span>Checking selected source-text patterns...</span>
                 </>
               ) : (
                 <>
                   <Lock className="w-3.5 h-3.5" />
-                  <span>Run Security Vulnerability Scan</span>
+                  <span>Run Heuristic Source Scan</span>
                 </>
               )}
             </button>

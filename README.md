@@ -15,6 +15,28 @@ Current implementation:
 - Heuristic source scanner for selected secret, dynamic-code, HTML-rendering, and shell-execution patterns. It is not a complete OWASP audit and does not inspect dependency advisories or runtime data flow.
 - Server-side Gemini consultation when `GEMINI_API_KEY` is configured. The AI endpoint returns suggestions; it does not automatically apply, build, or verify code changes.
 - A deployment gate that deliberately blocks readiness while required build, dependency, runtime-security, and browser E2E evidence is unavailable.
+- The role registry and task queues are UI/planning features, not a worker scheduler. The health index is a heuristic summary of recorded role reports, not an application-health score. The rollback screen is a policy simulator; it does not automatically revert real repository changes.
+
+Do not treat a green project-integrity check, a clean heuristic scan, or a successful server build as proof that a generated application is production-ready.
+
+## User-facing disclaimers and data handling
+
+- **Prototype / no warranty:** This project is provided as a prototype. Results may be incomplete or incorrect. Independently review all generated suggestions, files, checks, and deployment decisions.
+- **AI output:** AI responses are advisory, may contain errors or insecure code, and are not automatically applied, built, or tested.
+- **External AI processing:** When Gemini is configured, prompts and the selected file's contents are sent to Google's Gemini service. Do not submit secrets, credentials, personal data, or confidential material unless authorized and the applicable data-handling terms have been reviewed.
+- **Security and testing scope:** Source-pattern checks and stored-project integrity assertions are limited checks, not a security certification, full vulnerability audit, or tests of the generated application's runtime behavior.
+- **Deployment:** Passing available checks does not guarantee safety, legal compliance, reliability, or production readiness. Missing evidence must be verified independently.
+- **Rollback:** The rollback screen simulates policy outcomes. It does not automatically undo real repository merges. Manual snapshot restore changes the stored project state and should be used only after reviewing the target snapshot.
+- **Telemetry and logs:** Do not assume logs are a complete audit trail or contain no sensitive information. Restrict access and configure retention appropriate to your deployment.
+
+
+Current implementation:
+- Express backend with JSON-file persistence using temporary-write-and-rename (`data/db.json`). This is suitable for a prototype, not a multi-writer production database.
+- Process-level CPU and memory telemetry for the builder server.
+- Project-integrity assertions that inspect stored project records and persisted JSON. They do not represent runtime/API/browser E2E testing of a generated app.
+- Heuristic source scanner for selected secret, dynamic-code, HTML-rendering, and shell-execution patterns. It is not a complete OWASP audit and does not inspect dependency advisories or runtime data flow.
+- Server-side Gemini consultation when `GEMINI_API_KEY` is configured. The AI endpoint returns suggestions; it does not automatically apply, build, or verify code changes.
+- A deployment gate that deliberately blocks readiness while required build, dependency, runtime-security, and browser E2E evidence is unavailable.
 
 Do not treat a green project-integrity check, a clean heuristic scan, or a successful server build as proof that a generated application is production-ready.
 
@@ -49,9 +71,9 @@ The following table documents intended role responsibilities, not proof that eac
 
 ---
 
-## ⚡ Real-Time System Performance Sentinel & Canvas Telemetry
+## ⚡ Server Process Metrics and Canvas Charts
 
-Located directly in the **20-Agent Swarm** tab, the real-time performance sentinel monitors process-level metrics with hardware-accelerated canvas sparklines:
+Located directly in the **20-Agent Swarm** tab, the dashboard displays process-level metrics with hardware-accelerated canvas sparklines:
 
 - **Dual Canvas Sparkline Charts**: High-performance HTML5 Canvas sparklines (powered by Chart.js) rendering:
   - **CPU Utilization Sparkline**: Instantaneous and rolling CPU percent with smooth bezier interpolation, gradient fills, and peak tracking.
@@ -60,13 +82,13 @@ Located directly in the **20-Agent Swarm** tab, the real-time performance sentin
 - **Session Historical Mode**: Toggle between:
   - **Live Rolling Window (60s)**: High-frequency real-time continuous stream with configurable sampling rate (1s, 2s, 5s).
   - **Session Historical Mode**: Comprehensive timeline tracking performance from session inception, capturing all lifecycle telemetry points.
-- **Session Lifecycle Milestones**: Highlights key events on the timeline (Session Inception, Swarm Orchestration Runs, V8 GC Flushes, Test Validations) with interactive inspection badges.
+- **Session Lifecycle Events**: Displays recorded application events where available. Event markers are not proof of autonomous agent execution or generated-app test runs.
 - **Session Performance Summary Dashboard**:
   - Session start timestamp and total elapsed runtime.
   - Peak CPU spike (%) and minimum CPU recorded across the session.
   - Session-wide average CPU utilization.
   - Peak heap memory allocation vs initial heap at boot.
-  - Total V8 memory flushes and total completed swarm cycles.
+  - Recorded garbage-collection events and inspection runs, where available.
   - Historical filtering: "All Session", "Last 5m", "Last 15m", and "Swarm Runs Only".
 - **Interactive Controls**:
   - Live Stream Pause / Resume toggle.

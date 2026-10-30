@@ -59,6 +59,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ project }) => {
             <p className="text-xs text-slate-400 mt-1">
               Uses the configured server-side AI model to suggest code and architecture changes. Suggestions are not applied automatically and are not verified by a build or test run.
             </p>
+            <p className="text-xs text-amber-200 mt-2">
+              Data notice: when Gemini is configured, your prompt and any selected file's contents are sent to Google's Gemini service for processing. Do not submit secrets, credentials, personal data, or confidential code unless you are authorized to share them and have checked the applicable data-handling terms.
+            </p>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -69,7 +72,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ project }) => {
               onChange={(e) => setSelectedFileId(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
             >
-              <option value="">None (Whole Project)</option>
+              <option value="">No file context</option>
               {project.files.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.path}

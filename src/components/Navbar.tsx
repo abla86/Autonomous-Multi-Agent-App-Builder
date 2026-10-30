@@ -39,10 +39,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center space-x-2">
                 <span className="font-bold tracking-tight text-white text-lg">SWARMFORGE</span>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 font-mono">
-                  20 AGENTS AUTONOMOUS
+                  20 DEFINED ROLES
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Multi-Agent Software Engineering Swarm</p>
+              <p className="text-xs text-slate-400">Project inspection prototype</p>
             </div>
           </div>
 
@@ -93,12 +93,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               {isRunningSwarm ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Swarm Active (20/20)...</span>
+                  <span>Inspection running...</span>
                 </>
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Run Autonomous Swarm</span>
+                  <span>Run Static Inspection</span>
                 </>
               )}
             </button>
@@ -116,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Navigation Tabs */}
         <nav className="flex space-x-1 border-t border-slate-800/80 pt-1 overflow-x-auto">
           {[
-            { id: 'swarm', label: '20-Agent Swarm', icon: Bot },
+            { id: 'swarm', label: 'Static Inspection', icon: Bot },
             { id: 'observability', label: 'Observability & Logs', icon: Activity, badge: 'LIVE' },
             { id: 'rollback', label: 'Rollback & Snapshots', icon: RotateCcw },
             { id: 'flags', label: 'Feature Flags', icon: Sliders },
@@ -124,8 +124,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             { id: 'code', label: 'Code Doctor & Editor', icon: Terminal },
             { id: 'tests', label: 'Test Studio', icon: Gauge },
             { id: 'security', label: 'Security Center', icon: ShieldCheck },
-            { id: 'ai', label: 'Agent 19 (Gemini AI)', icon: Cpu },
-            { id: 'deploy', label: 'Agent 20 (Final QA & Deploy)', icon: ShieldCheck },
+            { id: 'ai', label: 'AI Suggestions', icon: Cpu },
+            { id: 'deploy', label: 'Deployment Checks', icon: ShieldCheck },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;

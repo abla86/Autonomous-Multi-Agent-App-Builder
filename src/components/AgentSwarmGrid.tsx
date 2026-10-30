@@ -117,7 +117,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
       const updated = currentList.map((t, idx) => ({ ...t, order: idx }));
 
       const agent = AGENT_REGISTRY.find((a) => a.id === agentId);
-      showToast(`🚀 Promoted "${item.title.slice(0, 32)}..." to TOP PRIORITY (#1 next in line) for ${agent?.name || agentId}!`);
+      showToast(`🚀 Promoted "${item.title.slice(0, 32)}..." to Top of local list for ${agent?.name || agentId}!`);
 
       return {
         ...prev,
@@ -199,7 +199,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
       });
       return nextQueues;
     });
-    showToast(`⚡ All 20 agents' task queues automatically re-ordered by priority.`);
+    showToast(`⚡ All 20 role planning lists reordered by priority.`);
   };
 
   const filteredAgents = AGENT_REGISTRY.filter((agent) => {
@@ -212,12 +212,12 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
   });
 
   const getAgentStatus = (agentId: string) => {
-    if (isRunningSwarm) return { label: 'Executing...', color: 'text-amber-400 bg-amber-400/10 border-amber-500/20' };
+    if (isRunningSwarm) return { label: 'Inspection running', color: 'text-amber-400 bg-amber-400/10 border-amber-500/20' };
     if (!lastResults || !lastResults[agentId]) {
       return { label: 'Standing By', color: 'text-slate-400 bg-slate-800 border-slate-700' };
     }
     const res = lastResults[agentId];
-    if (res.status === 'passed') return { label: 'Verified', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
+    if (res.status === 'passed') return { label: 'Reported pass', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
     if (res.status === 'warning') return { label: 'Notice', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
     return { label: 'Attention', color: 'text-rose-400 bg-rose-500/10 border-rose-500/30' };
   };
@@ -293,11 +293,11 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
           <div className="flex items-center space-x-2">
             <Flame className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <span className="font-semibold">
-              Live Swarm Execution In Progress: Real-time Task Re-ordering & Priority Shifting is ACTIVE!
+              Static inspection is running. The role task lists below are local planning UI only.
             </span>
           </div>
           <span className="text-[11px] font-mono bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30 text-amber-200">
-            Reorder tasks below to alter immediate agent execution order
+            Reorder the local planning list; changes do not affect the running inspection.
           </span>
         </div>
       )}
@@ -307,18 +307,18 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2.5">
-              <h2 className="text-base font-semibold text-white">Autonomous Multi-Agent Swarm Registry</h2>
+              <h2 className="text-base font-semibold text-white">Defined Role Registry</h2>
               <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">
                 20 SPECIALIZED ROLES
               </span>
               {isRunningSwarm && (
                 <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono animate-pulse">
-                  PARALLEL WORKERS ACTIVE
+                  STATIC INSPECTION ACTIVE
                 </span>
               )}
             </div>
             <p className="text-xs text-slate-400 mt-1 max-w-3xl">
-              Coordinated by the Master Orchestrator. Inspect agents, re-order pending operational tasks, or adjust priority rankings dynamically during execution.
+              Browse the 20 defined role descriptions and reorder local planning lists. These queues are UI-only and are not dispatched to workers.
             </p>
           </div>
 
@@ -510,10 +510,10 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
             <div>
               <h3 className="text-sm font-bold text-white flex items-center space-x-2">
                 <ListOrdered className="w-4 h-4 text-indigo-400" />
-                <span>Live Swarm Task Priority & Dispatch Queue</span>
+                <span>Local Role Planning Lists</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Adjust the execution sequence of pending tasks across all 20 agents. During a live swarm run, tasks at the top are dispatched immediately.
+                Reorder task descriptions for planning purposes. These entries are not dispatched and do not change the static inspection.
               </p>
             </div>
 
@@ -615,7 +615,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                                 </span>
                                 {isTop && (
                                   <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
-                                    {isRunningSwarm ? 'Executing Now' : 'Next in Line'}
+                                    {isRunningSwarm ? 'Inspection running' : 'Planning only'}
                                   </span>
                                 )}
                               </div>
@@ -774,7 +774,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                       </span>
                       <span className="text-[11px] text-slate-400">
                         {isRunningSwarm
-                          ? 'Swarm is running. Moving a task to #1 adjusts the immediate worker payload.'
+                          ? 'The inspection is running. Reordering this list does not affect it.'
                           : 'Re-order tasks with Up/Down buttons or set priority pills (P0-P3).'}
                       </span>
                     </div>
@@ -829,7 +829,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                                 </span>
                                 {isTop && (
                                   <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
-                                    {isRunningSwarm ? 'Executing' : 'Next'}
+                                    {isRunningSwarm ? 'Inspection running' : 'Planning only'}
                                   </span>
                                 )}
                               </div>
@@ -931,10 +931,10 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-                      Latest Autonomous Run Findings
+                      Latest Static Inspection Result
                     </span>
                     <span className="text-xs text-emerald-400 font-medium">
-                      Verified in {lastResults[inspectingAgent.id].durationMs}ms
+                      Recorded result duration: {lastResults[inspectingAgent.id].durationMs}ms
                     </span>
                   </div>
 
@@ -956,7 +956,7 @@ export const AgentSwarmGrid: React.FC<AgentSwarmGridProps> = ({
                     </div>
 
                     <div>
-                      <span className="text-[11px] font-mono text-slate-400 block mb-1">Repairs / Protections Applied:</span>
+                      <span className="text-[11px] font-mono text-slate-400 block mb-1">Repairs reported by inspection:</span>
                       <ul className="space-y-1">
                         {lastResults[inspectingAgent.id].repairsApplied.map((r, i) => (
                           <li key={i} className="text-xs text-indigo-300 flex items-center space-x-1.5">

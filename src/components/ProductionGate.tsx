@@ -43,6 +43,9 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
             </div>
             <div>
               <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-white">Deployment Readiness Checks</h2>
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${readyForDeploy ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                  {readyForDeploy ? 'CHECKS PASSED' : checks.length ? 'BLOCKED / INCOMPLETE' : isLoading ? 'CHECKING' : 'UNAVAILABLE'}
                 <h2 className="text-base font-bold text-white">Agent 20 Final QA & Production Gate</h2>
                 <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${readyForDeploy ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
                   {readyForDeploy ? 'READY' : checks.length ? 'BLOCKED / INCOMPLETE' : isLoading ? 'CHECKING' : 'UNAVAILABLE'}
@@ -71,7 +74,7 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
               className="flex items-center space-x-2 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Deployment Artifact</span>
+              <span>Export Project JSON</span>
             </button>
           </div>
         </div>
@@ -79,11 +82,11 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
         {/* Verification metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-5 border-t border-slate-800 text-center">
           <div>
-            <span className="text-[11px] text-slate-500 font-mono block">COMPLIANCE SCORE</span>
+            <span className="text-[11px] text-slate-500 font-mono block">GATE CHECK SCORE</span>
             <span className="text-xl font-bold text-emerald-400 font-mono">{score}%</span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 font-mono block">ACCEPTANCE CHECKS</span>
+            <span className="text-[11px] text-slate-500 font-mono block">CHECKS PASSED</span>
             <span className="text-xl font-bold text-slate-200 font-mono">{checks.filter(c => c.status === 'pass').length} / {checks.length}</span>
           </div>
           <div>
@@ -91,6 +94,8 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
             <span className="text-xl font-bold text-indigo-400 font-mono">Evidence-based</span>
           </div>
           <div>
+            <span className="text-[11px] text-slate-500 font-mono block">DEPLOYMENT CHECKS</span>
+            <span className={`text-xl font-bold font-mono ${readyForDeploy ? "text-emerald-400" : "text-rose-400"}`}>{readyForDeploy ? "CHECKS PASSED" : "BLOCKED"}</span>
             <span className="text-[11px] text-slate-500 font-mono block">PRODUCTION SIGN-OFF</span>
             <span className={`text-xl font-bold font-mono ${readyForDeploy ? "text-emerald-400" : "text-rose-400"}`}>{readyForDeploy ? "READY" : "BLOCKED"}</span>
           </div>
@@ -100,6 +105,7 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
       {/* 16-Point Final Acceptance Grid */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
         <div className="px-4 py-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+          <span>Deployment Check Results</span>
           <span>Final Acceptance Gate Matrix</span>
           <span>{checks.length} Evidence Checks</span>
         </div>
