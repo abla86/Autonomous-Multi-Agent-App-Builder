@@ -49,53 +49,52 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeCell, setActiveCell] = useState<CellData | null>(null);
 
-  // Targets on the X-axis: All project files + architectural submodules
-  const targets = [
-    ...project.files.map((f) => ({ id: f.id, path: f.path, name: f.name })),
-    { id: 'arch-security', path: 'Security & Auth Guard', name: 'Security Guard' },
-    { id: 'arch-qa', path: 'QA & Test Assertions', name: 'QA Engine' },
-    { id: 'arch-api', path: 'API Routing & Gateways', name: 'API Gateway' },
-  ];
+  // Results are role-level only; the backend does not map findings to individual files.
+  const targets = [{ id: 'role-result', path: 'Role-level source inspection', name: 'Inspection result' }];
 
   // Filter agents by category
   const filteredAgents = AGENT_REGISTRY.filter((a) => {
     return selectedCategory === 'all' || a.category === selectedCategory;
   });
 
-  // Calculate cell value based on current metric
+  // Calculate cell value from recorded results only; never fabricate a baseline.
   const getCellData = (agent: AgentDefinition, target: { id: string; path: string; name: string }): CellData => {
     const res = lastResults ? lastResults[agent.id] : null;
-
-    // Deterministic synthetic baseline based on agent mandate relevance to file
-    const isTargetFile = target.path.includes('.tsx') || target.path.includes('.ts');
-    const isRelevantToAgent =
-      (agent.category === 'core' && (target.name.includes('App') || target.name.includes('server') || target.name.includes('storage'))) ||
-      (agent.category === 'quality' && (target.name.includes('Test') || target.path.includes('QA'))) ||
-      (agent.category === 'infrastructure' && (target.name.includes('server') || target.path.includes('Security') || target.name.includes('metrics'))) ||
-      (agent.category === 'product' && (target.name.includes('App') || target.path.includes('API')));
+    if (!res) {
+      return {
+        agent,
+        targetFile: target.path,
+        targetName: target.name,
+        value: 0,
+        label: '—',
+        level: 'none',
+        details: {
+          findings: ['No run result recorded; this cell has not been assessed.'],
+          repairs: [],
+          durationMs: 0,
+          status: 'not_run',
+        },
+      };
+    }
 
     let value = 0;
     let label = '';
     let level: 'none' | 'low' | 'medium' | 'high' | 'critical' = 'none';
 
-    const baseFindings = res?.findings || [
-      `Contract verified on ${target.name}`,
-      `Zero blocking violations detected in AST`,
-    ];
-    const baseRepairs = res?.repairsApplied || [
-      `Normalized defensive invariants for ${target.name}`,
-    ];
-    const durationMs = res?.durationMs || (20 + (agent.index * 7) % 45);
-    const status = res?.status || 'passed';
+    const baseFindings = res?.findings || ['No result recorded for this role.'];
+    const baseFindings = res?.findings || ['No result recorded for this agent; no finding has been verified.'];
+    const baseRepairs = res?.repairsApplied || [];
+    const durationMs = res?.durationMs || 0;
+    const status = res?.status || 'warning';
 
     if (metric === 'operations') {
-      // Metric: Operations & Invariant Repairs
+      // Count only recorded findings and repairs; this is not a count of executed operations.
       const repairsCount = res?.repairsApplied.length || 0;
       const findingsCount = res?.findings.length || 0;
-      const baseOps = isRelevantToAgent ? 3 + (agent.index % 4) : 1;
-      value = (res ? repairsCount * 2 + findingsCount : baseOps);
+      value = res ? repairsCount + findingsCount : 0;
+      value = res ? repairsCount * 2 + findingsCount : 0;
 
-      label = `${value} ops`;
+      label = `${value} items`;
       if (value > 6) level = 'critical';
       else if (value > 4) level = 'high';
       else if (value > 2) level = 'medium';
@@ -113,7 +112,8 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
 
     } else if (metric === 'findings') {
       // Metric: Findings & Warnings
-      const findingsCount = res?.findings.length || (isRelevantToAgent ? 2 : 1);
+      const findingsCount = res?.findings.length || 0;
+      value = findingsCount;
       const isWarn = status === 'warning';
       value = isWarn ? findingsCount + 3 : findingsCount;
       label = `${value} findings`;
@@ -123,21 +123,24 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
       else level = 'low';
 
     } else {
-      // Metric: Health Grade (0 - 100)
+      // Report the recorded status, not a fabricated numeric health score.
       if (status === 'passed') {
-        value = 98 - (agent.index % 5);
-        level = 'low'; // In health, low risk = green/optimal
+        value = 1;
+        level = 'low';
+        label = 'PASS';
       } else if (status === 'fixed') {
-        value = 90;
+        value = 1;
         level = 'medium';
+        label = 'FIXED';
       } else if (status === 'warning') {
-        value = 75;
+        value = 0;
         level = 'high';
+        label = 'WARN';
       } else {
-        value = 50;
+        value = 0;
         level = 'critical';
+        label = 'ERROR';
       }
-      label = `${value}%`;
     }
 
     return {
@@ -174,16 +177,17 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
 
   // Aggregated Bottlenecks
   const resultsList: AgentResult[] = lastResults ? (Object.values(lastResults) as AgentResult[]) : [];
-  const activeRepairsCount: number = resultsList.length > 0
-    ? resultsList.reduce((acc: number, r: AgentResult) => acc + (r.repairsApplied ? r.repairsApplied.length : 0), 0)
-    : 14;
-  const avgLatency: number = resultsList.length > 0
+  const activeRepairsCount: number = resultsList.reduce((acc: number, r: AgentResult) => acc + (r.repairsApplied ? r.repairsApplied.length : 0), 0);
+  const avgLatency: number | null = resultsList.length > 0
     ? Math.round(resultsList.reduce((acc: number, r: AgentResult) => acc + (r.durationMs || 0), 0) / resultsList.length)
-    : 48;
+    : null;
 
   return (
     <div id="agent-heatmap-container" className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-5">
       {/* Header & Metric Controls */}
+      <p className="text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+        Role-level findings are not mapped to individual files. Empty cells mean no result was recorded; this view is not a file-by-file audit.
+      </p>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <div className="flex items-center space-x-2.5">
@@ -191,19 +195,19 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
               <Flame className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-white tracking-wide">
-              Agent Activity &amp; Workload Heatmap
+              Recorded Role Results
             </h3>
             <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">
-              20 AGENTS × {targets.length} DOMAINS
+              20 DEFINED ROLES
             </span>
             {isRunningSwarm && (
               <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono animate-pulse">
-                LIVE METRICS STREAMING
+                INSPECTION RUNNING
               </span>
             )}
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Visual matrix mapping autonomous agents against repository files, AST nodes, and subsystems. Click any cell to inspect invariant findings and applied fixes.
+            Results from the current static inspection, grouped by defined role. This view does not show independent agent execution or file-by-file results.
           </p>
         </div>
 
@@ -220,7 +224,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
               }`}
             >
               <Zap className="w-3.5 h-3.5" />
-              <span>Operations &amp; Repairs</span>
+              <span>Findings &amp; Repairs</span>
             </button>
             <button
               id="metric-btn-latency"
@@ -256,7 +260,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
               }`}
             >
               <Shield className="w-3.5 h-3.5" />
-              <span>Health Score</span>
+              <span>Recorded Status</span>
             </button>
           </div>
         </div>
@@ -284,7 +288,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
 
         {/* Legend */}
         <div className="flex items-center space-x-2 font-mono text-[11px] text-slate-400">
-          <span>Heat Intensity:</span>
+          <span>Result indicator:</span>
           <div className="flex items-center space-x-1">
             <span className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-900 text-slate-500">Idle</span>
             <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">Low</span>
@@ -355,15 +359,15 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
         </table>
       </div>
 
-      {/* Heatmap Insights & Telemetry Bar */}
+      {/* Recorded inspection summary; no unmeasured telemetry is displayed. */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
         <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center space-x-3">
           <div className="p-2 rounded bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
             <Zap className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-slate-400 font-mono text-[11px] block">Total Swarm Operations</span>
-            <span className="text-slate-100 font-bold text-sm">{activeRepairsCount * 4 + 48} Invariant Checks</span>
+            <span className="text-slate-400 font-mono text-[11px] block">Recorded findings and repairs</span>
+            <span className="text-slate-100 font-bold text-sm">{resultsList.reduce((sum, r) => sum + (r.findings?.length || 0), 0)} findings · {activeRepairsCount} repairs</span>
           </div>
         </div>
 
@@ -372,7 +376,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
             <Clock className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-slate-400 font-mono text-[11px] block">Mean Agent Latency</span>
+            <span className="text-slate-400 font-mono text-[11px] block">Mean recorded result duration</span>
             <span className="text-slate-100 font-bold text-sm">{avgLatency} ms / module</span>
           </div>
         </div>
@@ -382,8 +386,8 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
             <Shield className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-slate-400 font-mono text-[11px] block">Bottlenecks &amp; High Contention</span>
-            <span className="text-emerald-400 font-bold text-sm">0 Blocking Contention Hotspots</span>
+            <span className="text-slate-400 font-mono text-[11px] block">Execution and contention metrics</span>
+            <span className="text-slate-300 font-bold text-sm">Not measured by this inspection</span>
           </div>
         </div>
       </div>
@@ -398,7 +402,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
               </span>
               <div>
                 <h4 className="text-sm font-bold text-white">
-                  {activeCell.agent.name} <span className="text-slate-400 font-normal">inspecting</span> {activeCell.targetName}
+                  {activeCell.agent.name} <span className="text-slate-400 font-normal">role result for</span> {activeCell.targetName}
                 </h4>
                 <p className="text-xs text-indigo-300 font-mono">{activeCell.targetFile}</p>
               </div>
@@ -416,7 +420,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
             {/* Findings */}
             <div>
               <span className="font-mono text-[11px] text-slate-400 uppercase tracking-wider block mb-1">
-                Verified Invariants &amp; Findings:
+                Recorded Findings:
               </span>
               <ul className="space-y-1">
                 {activeCell.details.findings.map((finding, idx) => (
@@ -431,7 +435,7 @@ export const AgentHeatmap: React.FC<AgentHeatmapProps> = ({
             {/* Repairs */}
             <div>
               <span className="font-mono text-[11px] text-slate-400 uppercase tracking-wider block mb-1">
-                Applied Protections &amp; Telemetry:
+                Repairs Reported:
               </span>
               <ul className="space-y-1">
                 {activeCell.details.repairs.map((repair, idx) => (

@@ -34,22 +34,25 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
 
   return (
     <div className="space-y-6">
-      {/* Top Banner with Production Certificate */}
+      {/* Evidence-based deployment gate status */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className={`w-12 h-12 rounded-xl border flex items-center justify-center ${readyForDeploy ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-amber-500/10 border-amber-500/30 text-amber-400"}`}>
               <ShieldCheck className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-white">Deployment Readiness Checks</h2>
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${readyForDeploy ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                  {readyForDeploy ? 'CHECKS PASSED' : checks.length ? 'BLOCKED / INCOMPLETE' : isLoading ? 'CHECKING' : 'UNAVAILABLE'}
                 <h2 className="text-base font-bold text-white">Agent 20 Final QA & Production Gate</h2>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold">
-                  {readyForDeploy ? 'CERTIFIED READY' : 'AUDITING'}
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ${readyForDeploy ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                  {readyForDeploy ? 'READY' : checks.length ? 'BLOCKED / INCOMPLETE' : isLoading ? 'CHECKING' : 'UNAVAILABLE'}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Strict 16-point Final Acceptance Checklist. No underagent can declare completion without Chief QA verification.
+                Evidence-based checks only. Unverified build, runtime security, dependency and browser tests block deployment readiness.
               </p>
             </div>
           </div>
@@ -71,7 +74,7 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
               className="flex items-center space-x-2 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Deployment Artifact</span>
+              <span>Export Project JSON</span>
             </button>
           </div>
         </div>
@@ -79,20 +82,22 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
         {/* Verification metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-5 border-t border-slate-800 text-center">
           <div>
-            <span className="text-[11px] text-slate-500 font-mono block">COMPLIANCE SCORE</span>
+            <span className="text-[11px] text-slate-500 font-mono block">GATE CHECK SCORE</span>
             <span className="text-xl font-bold text-emerald-400 font-mono">{score}%</span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 font-mono block">ACCEPTANCE CHECKS</span>
+            <span className="text-[11px] text-slate-500 font-mono block">CHECKS PASSED</span>
             <span className="text-xl font-bold text-slate-200 font-mono">{checks.filter(c => c.status === 'pass').length} / {checks.length}</span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 font-mono block">CONTAINER BINDING</span>
-            <span className="text-xl font-bold text-indigo-400 font-mono">0.0.0.0:3000</span>
+            <span className="text-[11px] text-slate-500 font-mono block">GATE MODE</span>
+            <span className="text-xl font-bold text-indigo-400 font-mono">Evidence-based</span>
           </div>
           <div>
+            <span className="text-[11px] text-slate-500 font-mono block">DEPLOYMENT CHECKS</span>
+            <span className={`text-xl font-bold font-mono ${readyForDeploy ? "text-emerald-400" : "text-rose-400"}`}>{readyForDeploy ? "CHECKS PASSED" : "BLOCKED"}</span>
             <span className="text-[11px] text-slate-500 font-mono block">PRODUCTION SIGN-OFF</span>
-            <span className="text-xl font-bold text-emerald-400 font-mono">APPROVED</span>
+            <span className={`text-xl font-bold font-mono ${readyForDeploy ? "text-emerald-400" : "text-rose-400"}`}>{readyForDeploy ? "READY" : "BLOCKED"}</span>
           </div>
         </div>
       </div>
@@ -100,16 +105,17 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
       {/* 16-Point Final Acceptance Grid */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
         <div className="px-4 py-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+          <span>Deployment Check Results</span>
           <span>Final Acceptance Gate Matrix</span>
-          <span>16 Standard Requirements</span>
+          <span>{checks.length} Evidence Checks</span>
         </div>
 
         <div className="divide-y divide-slate-800/80">
           {checks.map((check) => (
             <div key={check.id} className="p-3.5 hover:bg-slate-800/20 transition flex items-center justify-between gap-4">
               <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
-                  <Check className="w-3.5 h-3.5" />
+                <div className={`w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 ${check.status === 'pass' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : check.status === 'fail' ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400'}`}>
+                  {check.status === 'pass' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">
@@ -122,8 +128,8 @@ export const ProductionGate: React.FC<ProductionGateProps> = ({ project, onExpor
                 </div>
               </div>
 
-              <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold flex-shrink-0">
-                PASSED
+              <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full uppercase font-semibold flex-shrink-0 ${check.status === 'pass' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : check.status === 'fail' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}`}>
+                {check.status === 'pass' ? 'PASSED' : check.status === 'fail' ? 'FAILED' : 'NOT VERIFIED'}
               </span>
             </div>
           ))}

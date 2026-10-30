@@ -21,10 +21,10 @@ export const SecurityCenter: React.FC<SecurityCenterProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <ShieldCheck className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-base font-bold text-white">Agent 7 Security & Vulnerability Sentinel</h2>
+              <h2 className="text-base font-bold text-white">Heuristic Source Pattern Scan</h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Automated source code auditor checking against OWASP Top 10 vulnerabilities, leaked API tokens, and injection vectors.
+              Checks selected source-text patterns only. It is not a full OWASP audit and does not verify dependencies, runtime behavior, HTTP headers, or CORS.
             </p>
           </div>
 
@@ -32,8 +32,8 @@ export const SecurityCenter: React.FC<SecurityCenterProps> = ({
             {report && (
               <div className="flex items-center space-x-2">
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-400 font-mono block">SECURITY GRADE</span>
-                  <span className="text-base font-bold text-emerald-400 font-mono">{report.grade} ({report.score}/100)</span>
+                  <span className="text-[10px] text-slate-400 font-mono block">HEURISTIC SCAN SCORE</span>
+                  <span className={`text-base font-bold font-mono ${report.vulnerabilities.some(v => v.severity === "critical" || v.severity === "high") ? "text-rose-400" : "text-amber-300"}`}>{report.score}/100 · {report.grade}</span>
                 </div>
               </div>
             )}
@@ -51,17 +51,24 @@ export const SecurityCenter: React.FC<SecurityCenterProps> = ({
               {isScanning ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Scanning AST & Sources...</span>
+                  <span>Checking selected source-text patterns...</span>
                 </>
               ) : (
                 <>
                   <Lock className="w-3.5 h-3.5" />
-                  <span>Run Security Vulnerability Scan</span>
+                  <span>Run Heuristic Source Scan</span>
                 </>
               )}
             </button>
           </div>
         </div>
+
+        {report?.limitations && (
+          <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+            <p className="font-semibold">Scope limitation</p>
+            <p className="mt-1">{report.limitations.join(' ')}</p>
+          </div>
+        )}
 
         {/* Checked Rules Checklist */}
         {report && (
@@ -96,9 +103,9 @@ export const SecurityCenter: React.FC<SecurityCenterProps> = ({
           {!report || report.vulnerabilities.length === 0 ? (
             <div className="p-8 text-center text-slate-400 text-xs flex flex-col items-center space-y-2">
               <ShieldCheck className="w-8 h-8 text-emerald-400" />
-              <p className="font-medium text-slate-200">Zero Critical Vulnerabilities Detected</p>
+              <p className="font-medium text-slate-200">No Matching Patterns Detected</p>
               <p className="text-slate-500 text-xs max-w-md">
-                No plain text secrets, eval expressions, or XSS vectors found in project source code.
+                No patterns were detected by the limited rules. This does not establish that the project is secure.
               </p>
             </div>
           ) : (

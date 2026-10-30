@@ -29,15 +29,15 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
   }, [logs]);
 
   const phases = [
-    { id: 'scan', label: '1. SCAN', desc: 'AST & Structure Inspection' },
-    { id: 'diagnose', label: '2. DIAGNOSE', desc: 'Dependency & Defect Audit' },
-    { id: 'parallel', label: '3. PARALLEL WORK', desc: 'Frontend, Backend, DB & Security' },
-    { id: 'integrate', label: '4. INTEGRATE', desc: 'Merge & Conflict Prevention' },
-    { id: 'test', label: '5. TEST', desc: 'Unit, Integration & E2E Journey' },
-    { id: 'qa', label: '6. FINAL QA', desc: 'Production Gate Verification' },
+    { id: 'scan', label: '1. FILES', desc: 'Stored file metadata and structure' },
+    { id: 'diagnose', label: '2. SOURCE', desc: 'Selected text-pattern checks' },
+    { id: 'parallel', label: '3. INTEGRITY', desc: 'Duplicate IDs, paths and descriptors' },
+    { id: 'integrate', label: '4. TEST EVIDENCE', desc: 'Check whether test files are present' },
+    { id: 'test', label: '5. DOCUMENTATION', desc: 'Check README presence' },
+    { id: 'qa', label: '6. LIMITATIONS', desc: 'Build, runtime and E2E remain unverified' },
   ];
 
-  const currentPhaseIndex = isRunning ? 3 : results ? 5 : 0;
+  const currentPhaseIndex = isRunning ? 0 : -1;
 
   const filteredLogs = logs.filter((log) => {
     if (activeFilter === 'errors') return log.level === 'error' || log.level === 'warn';
@@ -53,10 +53,10 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
-              <h2 className="text-lg font-bold text-white tracking-tight">Master Orchestrator Pipeline</h2>
+              <h2 className="text-lg font-bold text-white tracking-tight">Project Static Analysis</h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Active Project: <strong className="text-slate-200">{project.name}</strong> · Files: {project.files.length} · Status: <span className="uppercase text-indigo-400 font-mono">{project.status}</span>
+              Project: <strong className="text-slate-200">{project.name}</strong> · Files: {project.files.length} · Status: <span className="uppercase text-indigo-400 font-mono">{project.status}</span>
             </p>
           </div>
 
@@ -81,12 +81,12 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
               {isRunning ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Swarm Executing Cycle...</span>
+                  <span>Inspecting Source...</span>
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 fill-current" />
-                  <span>Launch 20-Agent Autonomous Cycle</span>
+                  <span>Generate 20-Role Simulation Report</span>
                 </>
               )}
             </button>
@@ -96,7 +96,7 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
         {/* Phase Stepper */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mt-6 pt-5 border-t border-slate-800">
           {phases.map((p, idx) => {
-            const isCompleted = idx < currentPhaseIndex || (!isRunning && results !== null);
+            const isCompleted = isRunning && idx < currentPhaseIndex;
             const isCurrent = isRunning && idx === currentPhaseIndex;
 
             return (
@@ -160,7 +160,7 @@ export const LiveSwarmRunner: React.FC<LiveSwarmRunnerProps> = ({
         >
           {filteredLogs.length === 0 ? (
             <div className="text-slate-500 py-12 text-center font-sans text-xs">
-              Autonomous swarm telemetry will stream here upon launching an execution cycle.
+              This endpoint currently produces simulation-only role reports. It does not execute agents or modify project source files.
             </div>
           ) : (
             filteredLogs.map((entry, idx) => {

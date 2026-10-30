@@ -54,10 +54,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ project }) => {
           <div>
             <div className="flex items-center space-x-2">
               <Bot className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-base font-bold text-white">Agent 19 — AI Integration & Gemini 3.8 Flash</h2>
+              <h2 className="text-base font-bold text-white">AI Code Review & Suggestions</h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Connects directly to server-side Gemini 3.8 Flash SDK for real-time automated refactoring, architecture reviews, and test generation.
+              Uses the configured server-side AI model to suggest code and architecture changes. Suggestions are not applied automatically and are not verified by a build or test run.
+            </p>
+            <p className="text-xs text-amber-200 mt-2">
+              Data notice: when Gemini is configured, your prompt and any selected file's contents are sent to Google's Gemini service for processing. Do not submit secrets, credentials, personal data, or confidential code unless you are authorized to share them and have checked the applicable data-handling terms.
             </p>
           </div>
 
@@ -69,7 +72,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ project }) => {
               onChange={(e) => setSelectedFileId(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-mono"
             >
-              <option value="">None (Whole Project)</option>
+              <option value="">No file context</option>
               {project.files.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.path}
@@ -111,7 +114,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ project }) => {
 
         <div className="flex justify-between items-center">
           <span className="text-[11px] text-slate-500 font-mono">
-            Model: gemini-3.8-flash · Server-side execution only
+            Server-side AI · Suggestions only
           </span>
 
           <button
